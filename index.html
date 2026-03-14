@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>my portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- BLOBS -->
+<div class="blob b1"></div>
+<div class="blob b2"></div>
+<div class="blob b3"></div>
+
+<!-- OVERLAY -->
+<div class="ov" id="ov"></div>
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header class="hdr">
+  <a class="logo-pill" href="#">my portal</a>
+  <div class="hdr-right">
+    <span class="hdate" id="hdate"></span>
+    <span class="streak-badge" id="sbadge">✦ 0 day streak</span>
+  </div>
+</header>
+
+<!-- ══════════════ SECTION 1 — PERSONAL ══════════════ -->
+<div class="sec-label">✦ Personal</div>
+<nav class="tabs" data-section="s1">
+  <button class="tab active" data-t="habits">Goals & Habits</button>
+  <button class="tab" data-t="workout">Workouts <span class="tcnt" id="cnt-wk">0</span></button>
+  <button class="tab" data-t="calendar">Calendar</button>
+</nav>
+
+<div class="panels" data-section="s1">
+  <div class="main-wrap">
+
+    <!-- HABITS & GOALS -->
+    <div class="panel active" id="p-habits">
+      <div class="ph">
+        <div><div class="ptitle">Goals & Habits</div><div class="psub">Daily check-ins · build your streak</div></div>
+        <div class="pact">
+          <button class="btn btn-g" id="btn-goal">+ Goal</button>
+          <button class="btn btn-p" id="btn-habit">+ Habit</button>
+        </div>
+      </div>
+      <div class="divl"><span>Today's Habits</span></div>
+      <div id="habit-list"></div>
+      <div class="divl"><span>Goals</span></div>
+      <div id="goal-list"></div>
+    </div>
+
+    <!-- WORKOUTS -->
+    <div class="panel" id="p-workout">
+      <div class="ph">
+        <div><div class="ptitle">Workout Tracker</div><div class="psub">Log sessions · track your week</div></div>
+        <button class="btn btn-p" id="btn-wk">+ Log Workout</button>
+      </div>
+      <div class="stats-row" id="wk-stats"></div>
+      <div class="divl"><span>This Week</span></div>
+      <div class="wk-week" id="wk-week"></div>
+      <div class="divl"><span>All Sessions</span></div>
+      <div id="wk-list"></div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="panel" id="p-calendar">
+      <div class="ph">
+        <div><div class="ptitle">My Calendar</div><div class="psub">Weekly schedule · click any slot to add · workouts sync automatically</div></div>
+        <div class="pact">
+          <button class="btn btn-g" id="btn-cal-today">Today</button>
+          <button class="btn btn-p" id="btn-cal-add">+ Add Event</button>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#8b5cf6"></div>Workout</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#ec4899"></div>Social</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#3b82f6"></div>Work</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#10b981"></div>Personal</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#f59e0b"></div>Other</div>
+      </div>
+      <div class="week-nav">
+        <button class="nav-btn" id="prev-wk">← Prev</button>
+        <span class="week-label" id="week-label"></span>
+        <button class="nav-btn" id="next-wk">Next →</button>
+      </div>
+      <div class="cal-wrap">
+        <div><div class="cal-grid" id="cal-grid"></div></div>
+        <div class="day-detail" id="day-detail">
+          <div class="dd-title" id="dd-title">Select a day</div>
+          <div id="dd-events"><div class="dd-empty">Click any day column to see events</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════ SECTION 2 — CAREER & KNOWLEDGE ══════════════ -->
+<div class="sec-label" style="top:58px">✦ Career & Knowledge</div>
+<nav class="tabs" data-section="s2" style="top:88px">
+  <button class="tab active" data-t="news">Daily Feed</button>
+  <button class="tab" data-t="media">Saved Media <span class="tcnt" id="cnt-med">0</span></button>
+  <button class="tab" data-t="courses">Courses <span class="tcnt" id="cnt-crs">0</span></button>
+  <button class="tab" data-t="conferences">Conferences <span class="tcnt" id="cnt-conf">0</span></button>
+  <button class="tab" data-t="apps">Applications <span class="tcnt" id="cnt-apps">0</span></button>
+</nav>
+
+<div class="panels" data-section="s2">
+  <div class="main-wrap">
+
+    <!-- DAILY FEED -->
+    <div class="panel active" id="p-news">
+      <div class="ph">
+        <div><div class="ptitle">Today's Feed</div><div class="psub">Science · Biotech · Pharma · Business · World</div></div>
+        <div class="pact">
+          <button class="btn btn-g" id="btn-art">+ Save Article</button>
+          <button class="btn btn-p" id="btn-refresh">↻ Refresh</button>
+        </div>
+      </div>
+      <div class="spills">
+        <span class="spill">Nature</span><span class="spill">STAT News</span><span class="spill">BioPharma Dive</span>
+        <span class="spill">Science</span><span class="spill">The Lancet</span><span class="spill">AI & Biotech</span>
+        <span class="spill">Business</span><span class="spill">World News</span>
+      </div>
+      <div class="ngrid" id="news-feed"><div class="ld" style="grid-column:1/-1"><div class="spin"></div><p>fetching headlines…</p></div></div>
+      <div class="divl"><span>Saved Articles</span></div>
+      <div id="saved-arts"></div>
+    </div>
+
+    <!-- SAVED MEDIA -->
+    <div class="panel" id="p-media">
+      <div class="ph">
+        <div><div class="ptitle">Saved Media</div><div class="psub">Podcasts, videos & webinars</div></div>
+        <button class="btn btn-p" id="btn-med">+ Add Link</button>
+      </div>
+      <div class="fbar" id="med-f">
+        <button class="fc active" data-f="all">All</button>
+        <button class="fc" data-f="science">Science</button>
+        <button class="fc" data-f="business">Business</button>
+        <button class="fc" data-f="health">Health</button>
+        <button class="fc" data-f="tech">Tech</button>
+        <button class="fc" data-f="pharma">Pharma</button>
+        <button class="fc" data-f="aitech">AI & Biotech</button>
+        <button class="fc" data-f="general">General</button>
+      </div>
+      <div id="med-list"></div>
+    </div>
+
+    <!-- COURSES -->
+    <div class="panel" id="p-courses">
+      <div class="ph">
+        <div><div class="ptitle">Learning Tracker</div><div class="psub">Courses, progress & notes</div></div>
+        <button class="btn btn-p" id="btn-crs">+ Add Course</button>
+      </div>
+      <div class="stats-row" id="crs-stats"></div>
+      <div id="crs-list"></div>
+    </div>
+
+    <!-- CONFERENCES -->
+    <div class="panel" id="p-conferences">
+      <div class="ph">
+        <div><div class="ptitle">Conference Notes</div><div class="psub">Log events · capture insights</div></div>
+        <button class="btn btn-p" id="btn-conf">+ Add Conference</button>
+      </div>
+      <div id="conf-list"></div>
+    </div>
+
+    <!-- APPLICATIONS -->
+    <div class="panel" id="p-apps">
+      <div class="ph">
+        <div><div class="ptitle">Application Tracker</div><div class="psub">Your full pipeline at a glance</div></div>
+        <button class="btn btn-p" id="btn-app">+ Log Application</button>
+      </div>
+      <div class="stats-row" id="app-stats"></div>
+      <div class="fbar" id="app-f">
+        <button class="fc active" data-af="all">All</button>
+        <button class="fc" data-af="applied">Applied</button>
+        <button class="fc" data-af="interview">Interview</button>
+        <button class="fc" data-af="offer">Offer</button>
+        <button class="fc" data-af="rejected">Rejected</button>
+      </div>
+      <div id="app-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════ MODALS ══════════════ -->
+
+<!-- Habit -->
+<div class="modal" id="m-habit">
+  <div class="mhdr"><h3>Add Habit</h3><button class="mx" data-close="m-habit">×</button></div>
+  <div class="mbody">
+    <div class="fld"><label>Name</label><input id="hb-n" placeholder="e.g. Read a paper, Meditate"></div>
+    <div class="fld"><label>Emoji</label><input id="hb-e" placeholder="🌸" maxlength="2" style="width:64px;font-size:18px"></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-habit">Cancel</button><button class="btn btn-p" id="sv-habit">Add</button></div>
+</div>
+
+<!-- Goal -->
+<div class="modal" id="m-goal">
+  <div class="mhdr"><h3>Add Goal</h3><button class="mx" data-close="m-goal">×</button></div>
+  <div class="mbody">
+    <div class="fld"><label>Goal</label><input id="gl-t" placeholder="e.g. Land a biotech internship by June"></div>
+    <div class="r2">
+      <div class="fld"><label>Category</label>
+        <select id="gl-c"><option value="career">Career</option><option value="learning">Learning</option><option value="health">Health</option><option value="research">Research</option><option value="personal">Personal</option></select>
+      </div>
+      <div class="fld"><label>Deadline</label><input id="gl-d" type="date"></div>
+    </div>
+    <div class="fld"><label>Progress %</label><input id="gl-p" type="number" min="0" max="100" placeholder="0"></div>
+    <div class="fld"><label>Notes</label><textarea id="gl-n" placeholder="Steps & milestones…"></textarea></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-goal">Cancel</button><button class="btn btn-p" id="sv-goal">Save</button></div>
+</div>
+
+<!-- Workout -->
+<div class="modal" id="m-wk">
+  <div class="mhdr"><h3>Log Workout</h3><button class="mx" data-close="m-wk">×</button></div>
+  <div class="mbody">
+    <div class="fld"><label>Type</label>
+      <select id="wk-tp">
+        <option value="elliptical">🔵 Elliptical</option><option value="run">🏃 Run</option>
+        <option value="incline">⛰️ Incline Walk</option><option value="stairs">🪜 Stair Master</option>
+        <option value="pump">🏋️ Body Pump</option><option value="sculpt">💪 Sculpt</option>
+        <option value="reformer">🧘 Reformer Pilates</option><option value="matpilates">🌸 Mat Pilates</option>
+        <option value="barre">🩰 Barre</option>
+      </select>
+    </div>
+    <div class="fld"><label>Date</label><input id="wk-dt" type="date"></div>
+    <div class="r3">
+      <div class="fld"><label>Duration (min)</label><input id="wk-dur" type="number" min="0" placeholder="45"></div>
+      <div class="fld"><label>Calories</label><input id="wk-cal" type="number" min="0" placeholder="300"></div>
+      <div class="fld"><label>Distance (km)</label><input id="wk-dis" type="number" min="0" step="0.1" placeholder="5.0"></div>
+    </div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-wk">Cancel</button><button class="btn btn-p" id="sv-wk">Save</button></div>
+</div>
+
+<!-- Calendar Event -->
+<div class="modal" id="m-ev">
+  <div class="mhdr"><h3>Add Event</h3><button class="mx" data-close="m-ev">×</button></div>
+  <div class="mbody">
+    <div class="fld"><label>Event Name</label><input id="ev-name" placeholder="e.g. Dinner with friends"></div>
+    <div class="r2">
+      <div class="fld"><label>Date</label><input id="ev-date" type="date"></div>
+      <div class="fld"><label>Time</label><input id="ev-time" type="time"></div>
+    </div>
+    <div class="fld"><label>Duration</label>
+      <select id="ev-dur">
+        <option value="30">30 min</option><option value="60" selected>1 hour</option>
+        <option value="90">1.5 hours</option><option value="120">2 hours</option>
+        <option value="180">3 hours</option><option value="0">All day</option>
+      </select>
+    </div>
+    <div class="fld"><label>Category</label>
+      <div class="cat-pick">
+        <button class="cat-chip workout sel" data-cat="workout">Workout</button>
+        <button class="cat-chip social" data-cat="social">Social</button>
+        <button class="cat-chip work" data-cat="work">Work</button>
+        <button class="cat-chip personal" data-cat="personal">Personal</button>
+        <button class="cat-chip other" data-cat="other">Other</button>
+      </div>
+    </div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-ev">Cancel</button><button class="btn btn-p" id="sv-ev">Save</button></div>
+</div>
+
+<!-- Article -->
+<div class="modal" id="m-art">
+  <div class="mhdr"><h3>Save Article</h3><button class="mx" data-close="m-art">×</button></div>
+  <div class="mbody">
+    <div class="fld"><label>Title</label><input id="a-ti" placeholder="Article title"></div>
+    <div class="fld"><label>URL</label><input id="a-ur" type="url" placeholder="https://..."></div>
+    <div class="fld"><label>Source</label><input id="a-sr" placeholder="e.g. Nature, STAT News"></div>
+    <div class="fld"><label>Tags</label>
+      <div style="margin-top:3px" id="a-tg">
+        <button class="tchip" data-v="science">Science</button><button class="tchip" data-v="pharma">Pharma</button>
+        <button class="tchip" data-v="health">Health</button><button class="tchip" data-v="aitech">AI & Biotech</button>
+        <button class="tchip" data-v="clinical">Clinical</button><button class="tchip" data-v="business">Business</button>
+        <button class="tchip" data-v="general">General</button>
+      </div>
+    </div>
+    <div class="fld"><label>Notes</label><textarea id="a-no" placeholder="Key takeaways…"></textarea></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-art">Cancel</button><button class="btn btn-p" id="sv-art">Save</button></div>
+</div>
+
+<!-- Media -->
+<div class="modal" id="m-med">
+  <div class="mhdr"><h3>Add Media Link</h3><button class="mx" data-close="m-med">×</button></div>
+  <div class="mbody">
+    <div class="fld"><label>Title</label><input id="md-ti" placeholder="Episode or video title"></div>
+    <div class="fld"><label>URL</label><input id="md-ur" type="url" placeholder="https://..."></div>
+    <div class="r2">
+      <div class="fld"><label>Type</label><select id="md-tp"><option>Podcast</option><option>YouTube</option><option>Webinar</option><option>Interview</option><option>Other</option></select></div>
+      <div class="fld"><label>Creator</label><input id="md-cr" placeholder="Channel / host"></div>
+    </div>
+    <div class="fld"><label>Tags</label>
+      <div style="margin-top:3px" id="md-tg">
+        <button class="tchip" data-v="science">Science</button><button class="tchip" data-v="business">Business</button>
+        <button class="tchip" data-v="health">Health</button><button class="tchip" data-v="tech">Tech</button>
+        <button class="tchip" data-v="pharma">Pharma</button><button class="tchip" data-v="aitech">AI & Biotech</button>
+        <button class="tchip" data-v="general">General</button>
+      </div>
+    </div>
+    <div class="fld"><label>Notes</label><textarea id="md-no" placeholder="Why you saved this…"></textarea></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-med">Cancel</button><button class="btn btn-p" id="sv-med">Save</button></div>
+</div>
+
+<!-- Course -->
+<div class="modal" id="m-crs">
+  <div class="mhdr"><h3>Add Course</h3><button class="mx" data-close="m-crs">×</button></div>
+  <div class="mbody">
+    <div class="fld"><label>Title</label><input id="cr-ti" placeholder="e.g. Drug Discovery Fundamentals"></div>
+    <div class="fld"><label>URL</label><input id="cr-ur" type="url" placeholder="https://..."></div>
+    <div class="r2">
+      <div class="fld"><label>Total Modules</label><input id="cr-to" type="number" min="1" placeholder="10"></div>
+      <div class="fld"><label>Completed</label><input id="cr-do" type="number" min="0" placeholder="0"></div>
+    </div>
+    <div class="fld"><label>Notes</label><textarea id="cr-no" placeholder="Learnings, assignments…"></textarea></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-crs">Cancel</button><button class="btn btn-p" id="sv-crs">Save</button></div>
+</div>
+
+<!-- Update Course -->
+<div class="modal" id="m-ecrs">
+  <div class="mhdr"><h3>Update Progress</h3><button class="mx" data-close="m-ecrs">×</button></div>
+  <div class="mbody">
+    <div class="fld"><label>Completed Modules</label><input id="ec-do" type="number" min="0"></div>
+    <div class="fld"><label>Notes</label><textarea id="ec-no"></textarea></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-ecrs">Cancel</button><button class="btn btn-p" id="upd-crs">Update</button></div>
+</div>
+
+<!-- Conference -->
+<div class="modal" id="m-conf">
+  <div class="mhdr"><h3>Log Conference</h3><button class="mx" data-close="m-conf">×</button></div>
+  <div class="mbody">
+    <div class="fld"><label>Name</label><input id="cf-na" placeholder="e.g. BIO International 2026"></div>
+    <div class="r2">
+      <div class="fld"><label>Date</label><input id="cf-dt" type="date"></div>
+      <div class="fld"><label>Location</label><input id="cf-lo" placeholder="City or Virtual"></div>
+    </div>
+    <div class="fld"><label>Key Learnings</label><textarea id="cf-le" placeholder="What did you learn?"></textarea></div>
+    <div class="fld"><label>Speakers / Sessions</label><textarea id="cf-sp" placeholder="Notable talks…"></textarea></div>
+    <div class="fld"><label>Action Items</label><textarea id="cf-ac" placeholder="Follow-up tasks…"></textarea></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-conf">Cancel</button><button class="btn btn-p" id="sv-conf">Save</button></div>
+</div>
+
+<!-- Application -->
+<div class="modal" id="m-app">
+  <div class="mhdr"><h3>Log Application</h3><button class="mx" data-close="m-app">×</button></div>
+  <div class="mbody">
+    <div class="r2">
+      <div class="fld"><label>Company</label><input id="ap-co" placeholder="Company name"></div>
+      <div class="fld"><label>Role</label><input id="ap-ro" placeholder="Job title"></div>
+    </div>
+    <div class="fld"><label>Job URL</label><input id="ap-ur" type="url" placeholder="https://..."></div>
+    <div class="r2">
+      <div class="fld"><label>Date Applied</label><input id="ap-dt" type="date"></div>
+      <div class="fld"><label>Status</label>
+        <select id="ap-st"><option value="applied">Applied</option><option value="interview">Interview</option><option value="offer">Offer</option><option value="rejected">Rejected</option></select>
+      </div>
+    </div>
+    <div class="fld"><label>Notes / Next Steps</label><textarea id="ap-no" placeholder="Contacts, follow-up date…"></textarea></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-app">Cancel</button><button class="btn btn-p" id="sv-app">Save</button></div>
+</div>
+
+<!-- Update Application -->
+<div class="modal" id="m-ua">
+  <div class="mhdr"><h3>Update Application</h3><button class="mx" data-close="m-ua">×</button></div>
+  <div class="mbody">
+    <div class="fld"><label>Status</label>
+      <select id="ua-st"><option value="applied">Applied</option><option value="interview">Interview</option><option value="offer">Offer</option><option value="rejected">Rejected</option></select>
+    </div>
+    <div class="fld"><label>Notes</label><textarea id="ua-no"></textarea></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-ua">Cancel</button><button class="btn btn-p" id="upd-app">Update</button></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
