@@ -26,7 +26,7 @@ let selCat = 'workout';
 const TODAY = new Date().toISOString().split('T')[0];
 
 // ── CONSTANTS ───────────────────────────────────────────────────
-const NEWS_API_KEY = 'YOUR_NEWSAPI_KEY_HERE'; // Replace with your NewsAPI.org key
+const NEWS_API_KEY = '64515b9dc47049cab14c2b5768692f63'; // Replace with your NewsAPI.org key
 
 const WI = { elliptical:'🔵', run:'🏃', incline:'⛰️', stairs:'🪜', pump:'🏋️', sculpt:'💪', reformer:'🧘', matpilates:'🌸', barre:'🩰' };
 const WN = { elliptical:'Elliptical', run:'Run', incline:'Incline Walk', stairs:'Stair Master', pump:'Body Pump', sculpt:'Sculpt', reformer:'Reformer Pilates', matpilates:'Mat Pilates', barre:'Barre' };
