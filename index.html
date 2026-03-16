@@ -54,12 +54,17 @@
     <!-- WORKOUTS -->
     <div class="panel" id="p-workout">
       <div class="ph">
-        <div><div class="ptitle">Workout Tracker</div><div class="psub">Log sessions · track your week</div></div>
-        <button class="btn btn-p" id="btn-wk">+ Log Workout</button>
+        <div><div class="ptitle">Workout Tracker</div><div class="psub">Log sessions · track your week · consistency chart</div></div>
+        <div class="pact">
+          <button class="btn btn-g" id="btn-wk-goal">Set Weekly Goal</button>
+          <button class="btn btn-p" id="btn-wk">+ Log Workout</button>
+        </div>
       </div>
       <div class="stats-row" id="wk-stats"></div>
       <div class="divl"><span>This Week</span></div>
       <div class="wk-week" id="wk-week"></div>
+      <div class="divl"><span>Week by Week Consistency</span></div>
+      <div class="glass" style="padding:1.2rem;margin-bottom:1rem" id="wk-chart"></div>
       <div class="divl"><span>All Sessions</span></div>
       <div id="wk-list"></div>
     </div>
@@ -132,18 +137,26 @@
     <!-- SAVED MEDIA -->
     <div class="panel" id="p-media">
       <div class="ph">
-        <div><div class="ptitle">Saved Media</div><div class="psub">Podcasts, videos & webinars</div></div>
-        <button class="btn btn-p" id="btn-med">+ Add Link</button>
+        <div><div class="ptitle">Saved Media</div><div class="psub">Videos · Podcasts · Articles · editable notes</div></div>
+        <button class="btn btn-p" id="btn-med">+ Add Media</button>
       </div>
-      <div class="fbar" id="med-f">
-        <button class="fc active" data-f="all">All</button>
-        <button class="fc" data-f="science">Science</button>
-        <button class="fc" data-f="business">Business</button>
-        <button class="fc" data-f="health">Health</button>
-        <button class="fc" data-f="tech">Tech</button>
-        <button class="fc" data-f="pharma">Pharma</button>
-        <button class="fc" data-f="aitech">AI & Biotech</button>
-        <button class="fc" data-f="general">General</button>
+      <div class="fbar" id="med-type-bar">
+        <button class="fc active" data-tv="all">All</button>
+        <button class="fc" data-tv="YouTube">▶ YouTube</button>
+        <button class="fc" data-tv="Podcast">🎧 Podcasts</button>
+        <button class="fc" data-tv="Article">📄 Articles</button>
+        <button class="fc" data-tv="Webinar">🎙 Webinars</button>
+        <button class="fc" data-tv="Interview">🎤 Interviews</button>
+      </div>
+      <div class="fbar" id="med-tag-bar">
+        <button class="fc active" data-tf="all">All Topics</button>
+        <button class="fc" data-tf="science">Science</button>
+        <button class="fc" data-tf="business">Business</button>
+        <button class="fc" data-tf="health">Health</button>
+        <button class="fc" data-tf="tech">Tech</button>
+        <button class="fc" data-tf="pharma">Pharma</button>
+        <button class="fc" data-tf="aitech">AI & Biotech</button>
+        <button class="fc" data-tf="general">General</button>
       </div>
       <div id="med-list"></div>
     </div>
@@ -151,11 +164,16 @@
     <!-- COURSES -->
     <div class="panel" id="p-courses">
       <div class="ph">
-        <div><div class="ptitle">Learning Tracker</div><div class="psub">Courses, progress & notes</div></div>
-        <button class="btn btn-p" id="btn-crs">+ Add Course</button>
+        <div><div class="ptitle">Courses</div><div class="psub">Following & interested · editable · rich notes</div></div>
+        <div class="pact">
+          <button class="btn btn-g" id="btn-add-interested">+ Interested</button>
+          <button class="btn btn-p" id="btn-add-following">+ Following</button>
+        </div>
       </div>
-      <div class="stats-row" id="crs-stats"></div>
-      <div id="crs-list"></div>
+      <div class="divl"><span>Currently Following</span></div>
+      <div id="crs-following"></div>
+      <div class="divl"><span>Interested In</span></div>
+      <div id="crs-interested"></div>
     </div>
 
     <!-- CONFERENCES -->
@@ -227,16 +245,28 @@
         <option value="pump">🏋️ Body Pump</option><option value="sculpt">💪 Sculpt</option>
         <option value="reformer">🧘 Reformer Pilates</option><option value="matpilates">🌸 Mat Pilates</option>
         <option value="barre">🩰 Barre</option>
+        <option value="weights">🏋️‍♀️ Weights</option>
+        <option value="trainer">👟 Personal Trainer</option>
       </select>
     </div>
     <div class="fld"><label>Date</label><input id="wk-dt" type="date"></div>
     <div class="r3">
       <div class="fld"><label>Duration (min)</label><input id="wk-dur" type="number" min="0" placeholder="45"></div>
       <div class="fld"><label>Calories</label><input id="wk-cal" type="number" min="0" placeholder="300"></div>
-      <div class="fld"><label>Distance (km)</label><input id="wk-dis" type="number" min="0" step="0.1" placeholder="5.0"></div>
+      <div class="fld"><label>Distance (km)</label><input id="wk-dis" type="number" min="0" step="0.1" placeholder="—"></div>
     </div>
   </div>
   <div class="mfoot"><button class="btn btn-g" data-close="m-wk">Cancel</button><button class="btn btn-p" id="sv-wk">Save</button></div>
+</div>
+
+<!-- Weekly Goal -->
+<div class="modal" id="m-wk-goal">
+  <div class="mhdr"><h3>Weekly Workout Goal</h3><button class="mx" data-close="m-wk-goal">×</button></div>
+  <div class="mbody">
+    <div class="fld"><label>Sessions per week I'm aiming for</label><input id="wk-goal-val" type="number" min="1" max="14" placeholder="4"></div>
+    <p style="font-size:11px;color:var(--t3);font-style:italic">Shows as a goal line on your weekly consistency chart</p>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-wk-goal">Cancel</button><button class="btn btn-p" id="sv-wk-goal">Save</button></div>
 </div>
 
 <!-- Calendar Event -->
@@ -290,13 +320,19 @@
 
 <!-- Media -->
 <div class="modal" id="m-med">
-  <div class="mhdr"><h3>Add Media Link</h3><button class="mx" data-close="m-med">×</button></div>
+  <div class="mhdr"><h3>Add Media</h3><button class="mx" data-close="m-med">×</button></div>
   <div class="mbody">
-    <div class="fld"><label>Title</label><input id="md-ti" placeholder="Episode or video title"></div>
+    <div class="fld"><label>Title</label><input id="md-ti" placeholder="Video, episode, or article title"></div>
     <div class="fld"><label>URL</label><input id="md-ur" type="url" placeholder="https://..."></div>
     <div class="r2">
-      <div class="fld"><label>Type</label><select id="md-tp"><option>Podcast</option><option>YouTube</option><option>Webinar</option><option>Interview</option><option>Other</option></select></div>
-      <div class="fld"><label>Creator</label><input id="md-cr" placeholder="Channel / host"></div>
+      <div class="fld"><label>Type</label>
+        <select id="md-tp">
+          <option value="YouTube">YouTube</option><option value="Podcast">Podcast</option>
+          <option value="Article">Article</option><option value="Webinar">Webinar</option>
+          <option value="Interview">Interview</option><option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="fld"><label>Creator / Source</label><input id="md-cr" placeholder="Channel, host, publication"></div>
     </div>
     <div class="fld"><label>Tags</label>
       <div style="margin-top:3px" id="md-tg">
@@ -306,34 +342,37 @@
         <button class="tchip" data-v="general">General</button>
       </div>
     </div>
-    <div class="fld"><label>Notes</label><textarea id="md-no" placeholder="Why you saved this…"></textarea></div>
+    <div class="fld"><label>Notes</label><textarea id="md-no" placeholder="Key takeaways, timestamps, why you saved this…"></textarea></div>
   </div>
   <div class="mfoot"><button class="btn btn-g" data-close="m-med">Cancel</button><button class="btn btn-p" id="sv-med">Save</button></div>
 </div>
 
 <!-- Course -->
 <div class="modal" id="m-crs">
-  <div class="mhdr"><h3>Add Course</h3><button class="mx" data-close="m-crs">×</button></div>
+  <div class="mhdr"><h3 id="m-crs-title">Add Course</h3><button class="mx" data-close="m-crs">×</button></div>
   <div class="mbody">
-    <div class="fld"><label>Title</label><input id="cr-ti" placeholder="e.g. Drug Discovery Fundamentals"></div>
-    <div class="fld"><label>URL</label><input id="cr-ur" type="url" placeholder="https://..."></div>
+    <input type="hidden" id="crs-edit-id">
+    <input type="hidden" id="crs-status-val">
+    <div class="fld"><label>Course Title</label><input id="cr-ti" placeholder="e.g. Drug Discovery Fundamentals"></div>
     <div class="r2">
-      <div class="fld"><label>Total Modules</label><input id="cr-to" type="number" min="1" placeholder="10"></div>
-      <div class="fld"><label>Completed</label><input id="cr-do" type="number" min="0" placeholder="0"></div>
+      <div class="fld"><label>URL / Link</label><input id="cr-ur" type="url" placeholder="https://..."></div>
+      <div class="fld"><label>Format</label>
+        <select id="cr-form">
+          <option value="Online">Online</option>
+          <option value="Onsite">Onsite</option>
+          <option value="Hybrid">Hybrid</option>
+        </select>
+      </div>
     </div>
-    <div class="fld"><label>Notes</label><textarea id="cr-no" placeholder="Learnings, assignments…"></textarea></div>
+    <div class="r2">
+      <div class="fld"><label>Date / Schedule</label><input id="cr-date" placeholder="e.g. Jan–Mar 2026, Tues 6pm"></div>
+      <div class="fld"><label>Contact Person</label><input id="cr-contact" placeholder="Name or email"></div>
+    </div>
+    <div class="fld"><label>Course Type Tag (write your own)</label><input id="cr-tag" placeholder="e.g. Clinical Research, Biotech MBA, Python…"></div>
+    <div class="fld"><label>Curriculum / Description</label><textarea id="cr-desc" placeholder="What this course covers, key topics, modules…"></textarea></div>
+    <div class="fld"><label>My Notes</label><textarea id="cr-notes" placeholder="Learnings, reflections, action items…"></textarea></div>
   </div>
   <div class="mfoot"><button class="btn btn-g" data-close="m-crs">Cancel</button><button class="btn btn-p" id="sv-crs">Save</button></div>
-</div>
-
-<!-- Update Course -->
-<div class="modal" id="m-ecrs">
-  <div class="mhdr"><h3>Update Progress</h3><button class="mx" data-close="m-ecrs">×</button></div>
-  <div class="mbody">
-    <div class="fld"><label>Completed Modules</label><input id="ec-do" type="number" min="0"></div>
-    <div class="fld"><label>Notes</label><textarea id="ec-no"></textarea></div>
-  </div>
-  <div class="mfoot"><button class="btn btn-g" data-close="m-ecrs">Cancel</button><button class="btn btn-p" id="upd-crs">Update</button></div>
 </div>
 
 <!-- Conference -->
