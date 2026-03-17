@@ -99,6 +99,7 @@ function initCatChips() {
 }
 function chips(pid) { return [...document.querySelectorAll('#'+pid+' .tchip.sel')].map(c => c.dataset.v); }
 function resetChips(pid) { document.querySelectorAll('#'+pid+' .tchip').forEach(c => c.classList.remove('sel')); }
+function initTchips(pid) { document.querySelectorAll('#'+pid+' .tchip').forEach(c => c.addEventListener('click', () => c.classList.toggle('sel'))); }
 
 // ── COUNTS & STREAK ──────────────────────────────────────────────
 function updCounts() {
@@ -355,7 +356,7 @@ window.dArt = i => { arts.splice(i,1); LS.s('kp_arts',arts); renderArts(); };
 
 // ── SAVED MEDIA ───────────────────────────────────────────────────
 el('btn-med').addEventListener('click', () => {
-  resetChips('md-tg'); ['md-ti','md-ur','md-cr','md-no'].forEach(id=>sv(id,'')); openM('m-med');
+  resetChips('md-tg'); initTchips('md-tg'); ['md-ti','md-ur','md-cr','md-no'].forEach(id=>sv(id,'')); openM('m-med');
 });
 el('sv-med').addEventListener('click', () => {
   const t=v('md-ti'); if (!t) return;
