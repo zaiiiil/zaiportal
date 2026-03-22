@@ -267,3 +267,42 @@ a.ct:hover { color: var(--purple); }
 .tchip.sel { background: var(--g1); color: #fff; border-color: transparent; }
 
 @media(max-width:600px){.hdr{padding:0 1rem}.main-wrap{padding:1rem}.tabs{padding:0 1rem}.ptitle{font-size:22px}.hdate{display:none}}
+
+/* ── NEWS SITE CARDS ─────────────────────────────── */
+.news-site-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: .8rem;
+}
+.news-site-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: .75rem 1rem;
+  background: var(--glass);
+  border: 1px solid rgba(168,85,247,.1);
+  border-radius: 14px;
+  text-decoration: none;
+  transition: transform .15s, box-shadow .15s;
+  backdrop-filter: blur(12px);
+}
+.news-site-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(168,85,247,.12);
+  border-color: rgba(168,85,247,.25);
+}
+.nsc-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.nsc-info { min-width: 0; }
+.nsc-name { font-size: 12px; font-weight: 700; color: var(--t); }
+.nsc-desc { font-size: 10px; color: var(--t3); margin-top: 1px; line-height: 1.3; }
