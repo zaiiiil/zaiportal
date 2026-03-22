@@ -107,7 +107,7 @@ let selCat = 'workout';
 const TODAY = new Date().toISOString().split('T')[0];
 
 // ── CONSTANTS ─────────────────────────────────────────────────────
-const NEWS_API_KEY = 'YOUR_NEWSAPI_KEY_HERE';
+const NEWS_WORKER_URL = 'https://proud-cell-2cbf.zailimwatanakul.workers.dev/';
 
 const WI  = { elliptical:'[e]', run:'[r]', incline:'[i]', stairs:'[s]', pump:'[p]', sculpt:'[sc]', reformer:'[rp]', matpilates:'[mp]', barre:'[b]', weights:'[w]', trainer:'[t]' };
 const WN  = { elliptical:'Elliptical', run:'Run', incline:'Incline Walk', stairs:'Stair Master', pump:'Body Pump', sculpt:'Sculpt', reformer:'Reformer Pilates', matpilates:'Mat Pilates', barre:'Barre', weights:'Weights', trainer:'Personal Trainer' };
@@ -511,14 +511,12 @@ window.handleCellClick = (date,time) => { sv('ev-date',date); sv('ev-time',time)
 async function fetchNews() {
   const feed=el('news-feed');
   feed.innerHTML='<div class="ld" style="grid-column:1/-1"><div class="spin"></div><p>fetching headlines...</p></div>';
-  if (NEWS_API_KEY==='YOUR_NEWSAPI_KEY_HERE') { feed.innerHTML='<div class="empty" style="grid-column:1/-1">Add your NewsAPI.org key in app.js to enable live headlines</div>'; return; }
   try {
-    const q=encodeURIComponent('biotech OR pharma OR "clinical trial" OR "drug discovery" OR "AI medicine" OR FDA OR science OR business');
-    const res=await fetch(`https://newsapi.org/v2/everything?q=${q}&language=en&sortBy=publishedAt&pageSize=9&apiKey=${NEWS_API_KEY}`);
+    const res=await fetch(NEWS_WORKER_URL);
     const data=await res.json();
     if (!data.articles?.length) throw new Error();
     feed.innerHTML=data.articles.map(a=>`<article class="glass nc"><div class="nc-src">${a.source?.name||'News'}</div><a class="nc-title" href="${a.url}" target="_blank">${a.title}</a><p class="nc-sum">${a.description||''}</p><div class="nc-date">${new Date(a.publishedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div></article>`).join('');
-  } catch { feed.innerHTML='<div class="empty" style="grid-column:1/-1">Could not load feed - check your API key</div>'; }
+  } catch { feed.innerHTML='<div class="empty" style="grid-column:1/-1">Could not load feed - try refreshing</div>'; }
 }
 
 // ── ARTICLES ──────────────────────────────────────────────────────
