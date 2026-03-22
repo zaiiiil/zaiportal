@@ -158,7 +158,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderCalendar(); selectDay(TODAY);
   renderArts(); renderMeds(); renderCourses(); renderConfs(); renderApps();
   updCounts(); updStreak();
-  fetchNews();
 
   // Habits
   el('btn-habit').addEventListener('click', () => openM('m-habit'));
@@ -253,20 +252,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   el('sv-crs').addEventListener('click', async () => {
     const ti = v('cr-ti'); if (!ti) return;
     const status = el('crs-status-val').value||newCrsStatus;
+    const entry = { title:ti, url:v('cr-ur'), form:el('cr-form').value, date:v('cr-date'), contact:v('cr-contact'), tag:v('cr-tag'), desc:v('cr-desc'), notes:v('cr-notes'), price:v('cr-price'), duration:v('cr-duration') };
     if (editCrsId) {
       const c = courses.find(x=>x.id===editCrsId);
-      if (c) { c.title=ti; c.url=v('cr-ur'); c.form=el('cr-form').value; c.date=v('cr-date'); c.contact=v('cr-contact'); c.tag=v('cr-tag'); c.desc=v('cr-desc'); c.notes=v('cr-notes'); }
+      if (c) Object.assign(c, entry);
     } else {
-      courses.push({ id:Date.now(), title:ti, url:v('cr-ur'), form:el('cr-form').value, date:v('cr-date'), contact:v('cr-contact'), tag:v('cr-tag'), desc:v('cr-desc'), notes:v('cr-notes'), status, added:TODAY });
+      courses.push({ id:Date.now(), ...entry, status, added:TODAY });
     }
     await save(); renderCourses(); updCounts();
-    editCrsId=null; ['cr-ti','cr-ur','cr-date','cr-contact','cr-tag','cr-desc','cr-notes'].forEach(id=>sv(id,'')); closeM('m-crs');
+    editCrsId=null; ['cr-ti','cr-ur','cr-date','cr-contact','cr-tag','cr-desc','cr-notes','cr-price','cr-duration'].forEach(id=>sv(id,'')); closeM('m-crs');
   });
   window.editCrs = id => {
     const c = courses.find(x=>x.id===id); if (!c) return;
     editCrsId=id; el('m-crs-title').textContent='Edit Course'; el('crs-status-val').value=c.status;
-    sv('cr-ti',c.title); sv('cr-ur',c.url); sv('cr-date',c.date); sv('cr-contact',c.contact);
-    sv('cr-tag',c.tag); sv('cr-desc',c.desc); sv('cr-notes',c.notes);
+    sv('cr-ti',c.title); sv('cr-ur',c.url||''); sv('cr-date',c.date||''); sv('cr-contact',c.contact||'');
+    sv('cr-tag',c.tag||''); sv('cr-desc',c.desc||''); sv('cr-notes',c.notes||'');
+    sv('cr-price',c.price||''); sv('cr-duration',c.duration||'');
     if (el('cr-form')) el('cr-form').value=c.form||'Online'; openM('m-crs');
   };
   window.toggleCrsStatus = async id => {
@@ -338,7 +339,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     el(`adp-${id}-${tab}`)?.classList.add('active');
   };
 
-  el('btn-refresh').addEventListener('click', fetchNews);
 });
 
 // ── APP LOC HELPER ────────────────────────────────────────────────
@@ -508,16 +508,7 @@ window.selectDay = d => { selDay=d; renderDayDetail(d); };
 window.handleCellClick = (date,time) => { sv('ev-date',date); sv('ev-time',time); openM('m-ev'); };
 
 // ── NEWS ──────────────────────────────────────────────────────────
-async function fetchNews() {
-  const feed=el('news-feed');
-  feed.innerHTML='<div class="ld" style="grid-column:1/-1"><div class="spin"></div><p>fetching headlines...</p></div>';
-  try {
-    const res=await fetch(NEWS_WORKER_URL);
-    const data=await res.json();
-    if (!data.articles?.length) throw new Error();
-    feed.innerHTML=data.articles.map(a=>`<article class="glass nc"><div class="nc-src">${a.source?.name||'News'}</div><a class="nc-title" href="${a.url}" target="_blank">${a.title}</a><p class="nc-sum">${a.description||''}</p><div class="nc-date">${new Date(a.publishedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div></article>`).join('');
-  } catch { feed.innerHTML='<div class="empty" style="grid-column:1/-1">Could not load feed - try refreshing</div>'; }
-}
+// news feed replaced with static site links
 
 // ── ARTICLES ──────────────────────────────────────────────────────
 function renderArts() {
@@ -526,47 +517,176 @@ function renderArts() {
   wrap.innerHTML=arts.map((a,i)=>`<div class="glass card-row"><div class="cb"><div class="cmeta">${a.source}${a.source&&a.date?' - ':''}${fD(a.date)}</div>${a.url?`<a class="ct" href="${a.url}" target="_blank">${a.title}</a>`:`<span class="ct">${a.title}</span>`}<div style="margin-top:3px">${a.tags.map(tH).join('')}</div>${a.notes?`<div class="cn">${a.notes}</div>`:''}</div><div class="ca"><button class="btn btn-d" onclick="dArt(${i})">Delete</button></div></div>`).join('');
 }
 
-// ── MEDIA ─────────────────────────────────────────────────────────
+// ── MEDIA — visual cards with YouTube thumbnails ─────────────────
+function getYouTubeId(url) {
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
 function renderMeds() {
   const wrap=el('med-list');
   let items=meds;
   if (medTypeF!=='all') items=items.filter(m=>m.type===medTypeF);
   if (medTagF!=='all') items=items.filter(m=>(m.tags||[]).includes(medTagF));
   if (!items.length) { wrap.innerHTML=`<div class="empty">${medTypeF==='all'&&medTagF==='all'?'No saved media yet':'Nothing matches these filters.'}</div>`; return; }
-  wrap.innerHTML=items.map(m=>{
-    const ri=meds.indexOf(m); const bg=MEDIA_TYPE_COLORS[m.type]||'rgba(139,92,246,.08)'; const ico=MEDIA_TYPE_ICONS[m.type]||'[o]';
-    return `<div class="glass card-row" style="flex-direction:column;gap:.6rem;align-items:stretch">
-      <div style="display:flex;gap:.8rem;align-items:flex-start">
-        <div style="width:40px;height:40px;border-radius:12px;background:${bg};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--t2);flex-shrink:0">${ico}</div>
-        <div style="flex:1;min-width:0"><div class="cmeta" style="margin-bottom:3px">${m.creator?m.creator+' - ':''}${fD(m.date)}</div>${m.url?`<a class="ct" href="${m.url}" target="_blank">${m.title}</a>`:`<span class="ct">${m.title}</span>`}<div style="margin-top:4px"><span class="pill ${MEDIA_TYPE_PILL[m.type]||'p-gen'}">${m.type}</span>${(m.tags||[]).map(t=>`<span class="pill ${TPILL[t]||'p-gen'}">${TLBLS[t]||t}</span>`).join('')}</div></div>
-        <button class="btn btn-d btn-sm" onclick="dMed(${ri})" style="flex-shrink:0">Delete</button>
-      </div>
-      <textarea style="width:100%;padding:8px 11px;border:1.5px solid #f0ebff;border-radius:10px;font-family:var(--font);font-size:12px;color:var(--t2);background:#faf8ff;resize:vertical;min-height:60px;line-height:1.5" placeholder="Notes, takeaways, timestamps..." onchange="saveMedNotes(${m.id},this.value)">${m.notes||''}</textarea>
-    </div>`;
-  }).join('');
+
+  // Group into grid for YouTube, list for others
+  const ytItems    = items.filter(m=>m.type==='YouTube');
+  const otherItems = items.filter(m=>m.type!=='YouTube');
+
+  let html = '';
+
+  // YouTube grid — thumbnail cards
+  if (ytItems.length) {
+    html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:1.2rem">`;
+    html += ytItems.map(m => {
+      const ri = meds.indexOf(m);
+      const vid = getYouTubeId(m.url);
+      const thumb = vid ? `https://img.youtube.com/vi/${vid}/mqdefault.jpg` : null;
+      return `<div class="glass" style="overflow:hidden;padding:0;display:flex;flex-direction:column">
+        ${thumb
+          ? `<a href="${m.url}" target="_blank" style="display:block;position:relative">
+              <img src="${thumb}" alt="${m.title}" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.15)">
+                <div style="width:44px;height:44px;border-radius:50%;background:rgba(255,0,0,.9);display:flex;align-items:center;justify-content:center">
+                  <div style="width:0;height:0;border-top:10px solid transparent;border-bottom:10px solid transparent;border-left:16px solid #fff;margin-left:4px"></div>
+                </div>
+              </div>
+            </a>`
+          : `<div style="aspect-ratio:16/9;background:rgba(239,68,68,.1);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#ef4444">No thumbnail</div>`}
+        <div style="padding:.75rem .9rem;flex:1;display:flex;flex-direction:column;gap:6px">
+          <a class="ct" href="${m.url||'#'}" target="_blank" style="font-size:13px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${m.title}</a>
+          <div style="font-size:11px;color:var(--t3)">${m.creator||''}${m.creator&&m.date?' - ':''}${fD(m.date)}</div>
+          <div>${(m.tags||[]).map(t=>`<span class="pill ${TPILL[t]||'p-gen'}">${TLBLS[t]||t}</span>`).join('')}</div>
+          <textarea style="width:100%;padding:6px 9px;border:1.5px solid #f0ebff;border-radius:8px;font-family:var(--font);font-size:11px;color:var(--t2);background:#faf8ff;resize:vertical;min-height:50px;line-height:1.5;margin-top:auto" placeholder="Notes, timestamps..." onchange="saveMedNotes(${m.id},this.value)">${m.notes||''}</textarea>
+          <button class="btn btn-d btn-sm" onclick="dMed(${ri})" style="align-self:flex-end;margin-top:2px">Delete</button>
+        </div>
+      </div>`;
+    }).join('');
+    html += `</div>`;
+  }
+
+  // Other media — compact visual rows
+  if (otherItems.length) {
+    const TYPE_ACCENT = { Podcast:'#10b981', Article:'#3b82f6', Webinar:'#8b5cf6', Interview:'#f59e0b', Other:'#9ca3af' };
+    html += otherItems.map(m => {
+      const ri = meds.indexOf(m);
+      const accent = TYPE_ACCENT[m.type] || '#9ca3af';
+      return `<div class="glass card-row" style="flex-direction:column;gap:.5rem;align-items:stretch;padding:0;overflow:hidden;margin-bottom:.5rem">
+        <div style="display:flex;align-items:stretch;gap:0">
+          <div style="width:5px;background:${accent};flex-shrink:0;border-radius:0"></div>
+          <div style="flex:1;padding:.75rem .9rem;display:flex;gap:.75rem;align-items:flex-start">
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+                <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:${accent}18;color:${accent}">${m.type}</span>
+                <span class="cmeta">${m.creator||''}${m.creator&&m.date?' - ':''}${fD(m.date)}</span>
+              </div>
+              ${m.url?`<a class="ct" href="${m.url}" target="_blank">${m.title}</a>`:`<span class="ct">${m.title}</span>`}
+              <div style="margin-top:4px">${(m.tags||[]).map(t=>`<span class="pill ${TPILL[t]||'p-gen'}">${TLBLS[t]||t}</span>`).join('')}</div>
+            </div>
+            <button class="btn btn-d btn-sm" onclick="dMed(${ri})" style="flex-shrink:0">Delete</button>
+          </div>
+        </div>
+        <div style="padding:0 .9rem .75rem">
+          <textarea style="width:100%;padding:6px 9px;border:1.5px solid #f0ebff;border-radius:8px;font-family:var(--font);font-size:11px;color:var(--t2);background:#faf8ff;resize:vertical;min-height:50px;line-height:1.5" placeholder="Notes, takeaways..." onchange="saveMedNotes(${m.id},this.value)">${m.notes||''}</textarea>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  wrap.innerHTML = html;
 }
 
-// ── COURSES ───────────────────────────────────────────────────────
+// ── COURSES — collapsible cards with detail tabs ─────────────────
 function renderCourses() {
   const renderList=(list,wrapId)=>{
     const wrap=el(wrapId);
     if (!list.length) { wrap.innerHTML='<div class="empty">None here yet</div>'; return; }
-    wrap.innerHTML=list.map(c=>`
-      <div class="glass" style="padding:1.1rem;margin-bottom:.6rem">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px">
-          <div><div style="font-size:14px;font-weight:700;color:var(--t);margin-bottom:5px">${c.url?`<a href="${c.url}" target="_blank" style="color:var(--t);text-decoration:none">${c.title}</a>`:c.title}</div>
-          <div><span style="display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:${c.status==='following'?'rgba(16,185,129,.12)':'rgba(139,92,246,.12)'};color:${c.status==='following'?'#065f46':'#5b21b6'};margin-right:4px">${c.status==='following'?'Following':'Interested'}</span>${c.form?`<span style="display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;margin-right:4px;background:${c.form==='Online'?'rgba(59,130,246,.1)':c.form==='Onsite'?'rgba(16,185,129,.1)':'rgba(245,158,11,.1)'};color:${c.form==='Online'?'#1e3a8a':c.form==='Onsite'?'#065f46':'#92400e'}">${c.form}</span>`:''}${c.tag?`<span style="display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(139,92,246,.1);color:#5b21b6">${c.tag}</span>`:''}</div></div>
-          <div style="display:flex;gap:5px;flex-shrink:0"><button class="btn btn-g btn-sm" onclick="editCrs(${c.id})">Edit</button><button class="btn btn-d btn-sm" onclick="dCrs(${c.id})">Delete</button></div>
+    wrap.innerHTML=list.map(c=>{
+      const statusBg = c.status==='following'?'rgba(16,185,129,.12)':'rgba(139,92,246,.12)';
+      const statusCl = c.status==='following'?'#065f46':'#5b21b6';
+      const fmtBg    = c.form==='Online'?'rgba(59,130,246,.1)':c.form==='Onsite'?'rgba(16,185,129,.1)':'rgba(245,158,11,.1)';
+      const fmtCl    = c.form==='Online'?'#1e3a8a':c.form==='Onsite'?'#065f46':'#92400e';
+      const detailTabs = [
+        { id:'price',    label:'Price',    val: c.price    || c.priceVal || '' },
+        { id:'duration', label:'Duration', val: c.duration || c.dur || '' },
+        { id:'nature',   label:'Nature',   val: [c.form, c.tag].filter(Boolean).join(' - ') || '' },
+        { id:'link',     label:'Link',     val: c.url || '' },
+      ];
+      return `<div class="glass" style="overflow:hidden;margin-bottom:.6rem;padding:0">
+        <!-- Header row — always visible, click to toggle -->
+        <div style="display:flex;align-items:center;gap:10px;padding:.9rem 1rem;cursor:pointer" onclick="toggleCrsExpand(${c.id})">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:700;color:var(--t);margin-bottom:4px">${c.title}</div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+              <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${statusBg};color:${statusCl}">${c.status==='following'?'Following':'Interested'}</span>
+              ${c.form?`<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${fmtBg};color:${fmtCl}">${c.form}</span>`:''}
+              ${c.tag?`<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(139,92,246,.1);color:#5b21b6">${c.tag}</span>`:''}
+              ${c.price?`<span style="font-size:10px;color:var(--t3)">${c.price}</span>`:''}
+              ${c.duration?`<span style="font-size:10px;color:var(--t3)">${c.duration}</span>`:''}
+            </div>
+          </div>
+          <div style="display:flex;gap:5px;flex-shrink:0" onclick="event.stopPropagation()">
+            <button class="btn btn-g btn-sm" onclick="editCrs(${c.id})">Edit</button>
+            <button class="btn btn-d btn-sm" onclick="dCrs(${c.id})">Delete</button>
+          </div>
+          <div id="crs-arrow-${c.id}" style="font-size:13px;color:var(--t3);transition:transform .2s;flex-shrink:0">v</div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">${c.date?`<div style="font-size:11px;color:var(--t2)"><span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--t3);display:block;margin-bottom:1px">Date</span>${c.date}</div>`:''}${c.contact?`<div style="font-size:11px;color:var(--t2)"><span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--t3);display:block;margin-bottom:1px">Contact</span>${c.contact}</div>`:''}</div>
-        ${c.desc?`<div style="font-size:12px;color:var(--t2);background:#f9f8ff;border:1px solid #f0ebff;border-radius:8px;padding:.55rem .8rem;margin-bottom:8px;line-height:1.5"><span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--t3);display:block;margin-bottom:3px">Curriculum</span>${c.desc}</div>`:''}
-        <textarea style="width:100%;padding:8px 11px;border:1.5px solid #f0ebff;border-radius:10px;font-family:var(--font);font-size:12px;color:var(--t2);background:#faf8ff;resize:vertical;min-height:70px;line-height:1.5" placeholder="Notes, learnings..." onchange="saveCrsNotes(${c.id},this.value)">${c.notes||''}</textarea>
-        <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn btn-g btn-sm" onclick="toggleCrsStatus(${c.id})">${c.status==='following'?'Move to Interested':'Move to Following'}</button></div>
-      </div>`).join('');
+
+        <!-- Expanded content -->
+        <div id="crs-body-${c.id}" style="display:none;border-top:1px solid #f5f0ff">
+
+          <!-- Detail tabs: Price / Duration / Nature / Link -->
+          <div style="display:flex;border-bottom:1px solid #f5f0ff;overflow-x:auto;scrollbar-width:none">
+            ${detailTabs.filter(t=>t.val).map((t,i)=>`
+              <button class="crs-dtab" data-cid="${c.id}" data-tab="${t.id}"
+                style="padding:7px 14px;font-size:11px;font-weight:600;background:none;border:none;border-bottom:2px solid ${i===0?'#a855f7':'transparent'};color:${i===0?'#a855f7':'var(--t3)'};cursor:pointer;white-space:nowrap;flex-shrink:0"
+                onclick="crsDetailTab(${c.id},'${t.id}',this)">${t.label}</button>`).join('')}
+            <button class="crs-dtab" data-cid="${c.id}" data-tab="notes"
+              style="padding:7px 14px;font-size:11px;font-weight:600;background:none;border:none;border-bottom:2px solid ${!detailTabs.filter(t=>t.val).length?'#a855f7':'transparent'};color:${!detailTabs.filter(t=>t.val).length?'#a855f7':'var(--t3)'};cursor:pointer;white-space:nowrap;flex-shrink:0"
+              onclick="crsDetailTab(${c.id},'notes',this)">Notes & Learnings</button>
+          </div>
+
+          <!-- Tab panels -->
+          ${detailTabs.filter(t=>t.val).map((t,i)=>`
+            <div id="crs-tp-${c.id}-${t.id}" class="crs-tpanel" style="display:${i===0?'block':'none'};padding:.85rem 1rem">
+              ${t.id==='link'
+                ? `<a href="${t.val}" target="_blank" style="color:#a855f7;font-size:13px;word-break:break-all">${t.val}</a>`
+                : `<div style="font-size:13px;color:var(--t2);line-height:1.6">${t.val}</div>`}
+            </div>`).join('')}
+
+          <div id="crs-tp-${c.id}-notes" class="crs-tpanel" style="display:${!detailTabs.filter(t=>t.val).length?'block':'none'};padding:.75rem 1rem">
+            ${c.desc?`<div style="font-size:12px;color:var(--t2);background:#f9f8ff;border:1px solid #f0ebff;border-radius:8px;padding:.55rem .8rem;margin-bottom:8px;line-height:1.5"><span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--t3);display:block;margin-bottom:3px">Curriculum</span>${c.desc}</div>`:''}
+            <textarea style="width:100%;padding:8px 11px;border:1.5px solid #f0ebff;border-radius:10px;font-family:var(--font);font-size:12px;color:var(--t2);background:#faf8ff;resize:vertical;min-height:80px;line-height:1.5" placeholder="Notes, learnings, action items..." onchange="saveCrsNotes(${c.id},this.value)">${c.notes||''}</textarea>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;padding:.5rem 1rem .8rem;border-top:1px solid #f5f0ff">
+            <button class="btn btn-g btn-sm" onclick="toggleCrsStatus(${c.id})">${c.status==='following'?'Move to Interested':'Move to Following'}</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
   };
   renderList(courses.filter(c=>c.status==='following'), 'crs-following');
   renderList(courses.filter(c=>c.status==='interested'), 'crs-interested');
 }
+
+window.toggleCrsExpand = id => {
+  const body  = el('crs-body-'+id);
+  const arrow = el('crs-arrow-'+id);
+  if (!body) return;
+  const open = body.style.display === 'block';
+  body.style.display  = open ? 'none' : 'block';
+  if (arrow) arrow.style.transform = open ? '' : 'rotate(180deg)';
+};
+window.crsDetailTab = (id, tab, btn) => {
+  document.querySelectorAll(`[id^="crs-tp-${id}-"]`).forEach(p => p.style.display='none');
+  el(`crs-tp-${id}-${tab}`).style.display = 'block';
+  document.querySelectorAll(`.crs-dtab[data-cid="${id}"]`).forEach(b => {
+    b.style.borderBottomColor = 'transparent'; b.style.color = 'var(--t3)';
+  });
+  btn.style.borderBottomColor = '#a855f7'; btn.style.color = '#a855f7';
+};
 
 // ── CONFERENCES ───────────────────────────────────────────────────
 function renderConfs() {
