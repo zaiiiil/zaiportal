@@ -118,18 +118,90 @@
     <!-- DAILY FEED -->
     <div class="panel active" id="p-news">
       <div class="ph">
-        <div><div class="ptitle">Today's Feed</div><div class="psub">Science · Biotech · Pharma · Business · World</div></div>
-        <div class="pact">
-          <button class="btn btn-g" id="btn-art">+ Save Article</button>
-          <button class="btn btn-p" id="btn-refresh">↻ Refresh</button>
-        </div>
+        <div><div class="ptitle">Today's Reading</div><div class="psub">Your daily news sources · click to open · save what matters</div></div>
+        <button class="btn btn-p" id="btn-art">+ Save Article</button>
       </div>
-      <div class="spills">
-        <span class="spill">Nature</span><span class="spill">STAT News</span><span class="spill">BioPharma Dive</span>
-        <span class="spill">Science</span><span class="spill">The Lancet</span><span class="spill">AI & Biotech</span>
-        <span class="spill">Business</span><span class="spill">World News</span>
+
+      <div class="divl"><span>World & General</span></div>
+      <div class="news-site-grid">
+        <a class="news-site-card" href="https://www.bbc.com/news" target="_blank">
+          <div class="nsc-logo" style="background:#bb1919;color:#fff">BBC</div>
+          <div class="nsc-info"><div class="nsc-name">BBC News</div><div class="nsc-desc">World news, politics, society</div></div>
+        </a>
+        <a class="news-site-card" href="https://www.economist.com" target="_blank">
+          <div class="nsc-logo" style="background:#e3120b;color:#fff">Ec</div>
+          <div class="nsc-info"><div class="nsc-name">The Economist</div><div class="nsc-desc">Global business, politics, ideas</div></div>
+        </a>
+        <a class="news-site-card" href="https://www.ft.com" target="_blank">
+          <div class="nsc-logo" style="background:#fff1e0;color:#a0522d;border:1px solid #f0c070">FT</div>
+          <div class="nsc-info"><div class="nsc-name">Financial Times</div><div class="nsc-desc">Finance, markets, global business</div></div>
+        </a>
+        <a class="news-site-card" href="https://www.reuters.com" target="_blank">
+          <div class="nsc-logo" style="background:#ff8000;color:#fff">R</div>
+          <div class="nsc-info"><div class="nsc-name">Reuters</div><div class="nsc-desc">Breaking news, unbiased reporting</div></div>
+        </a>
       </div>
-      <div class="ngrid" id="news-feed"><div class="ld" style="grid-column:1/-1"><div class="spin"></div><p>fetching headlines…</p></div></div>
+
+      <div class="divl"><span>Science & Health</span></div>
+      <div class="news-site-grid">
+        <a class="news-site-card" href="https://www.nature.com/news" target="_blank">
+          <div class="nsc-logo" style="background:#0d47a1;color:#fff">N</div>
+          <div class="nsc-info"><div class="nsc-name">Nature News</div><div class="nsc-desc">Leading peer-reviewed science</div></div>
+        </a>
+        <a class="news-site-card" href="https://www.science.org/news" target="_blank">
+          <div class="nsc-logo" style="background:#1565c0;color:#fff">Sc</div>
+          <div class="nsc-info"><div class="nsc-name">Science</div><div class="nsc-desc">AAAS — top research findings</div></div>
+        </a>
+        <a class="news-site-card" href="https://www.statnews.com" target="_blank">
+          <div class="nsc-logo" style="background:#c0392b;color:#fff">ST</div>
+          <div class="nsc-info"><div class="nsc-name">STAT News</div><div class="nsc-desc">Health, medicine, life sciences</div></div>
+        </a>
+        <a class="news-site-card" href="https://www.thelancet.com" target="_blank">
+          <div class="nsc-logo" style="background:#8e24aa;color:#fff">L</div>
+          <div class="nsc-info"><div class="nsc-name">The Lancet</div><div class="nsc-desc">Medical journals & clinical research</div></div>
+        </a>
+      </div>
+
+      <div class="divl"><span>Biotech, Pharma & AI</span></div>
+      <div class="news-site-grid">
+        <a class="news-site-card" href="https://www.fiercebiotech.com" target="_blank">
+          <div class="nsc-logo" style="background:#00897b;color:#fff">FB</div>
+          <div class="nsc-info"><div class="nsc-name">Fierce Biotech</div><div class="nsc-desc">Biotech industry news & deals</div></div>
+        </a>
+        <a class="news-site-card" href="https://www.biopharmdive.com" target="_blank">
+          <div class="nsc-logo" style="background:#1976d2;color:#fff">BD</div>
+          <div class="nsc-info"><div class="nsc-name">BioPharma Dive</div><div class="nsc-desc">Drug development & FDA approvals</div></div>
+        </a>
+        <a class="news-site-card" href="https://endpts.com" target="_blank">
+          <div class="nsc-logo" style="background:#e65100;color:#fff">EP</div>
+          <div class="nsc-info"><div class="nsc-name">Endpoints News</div><div class="nsc-desc">Clinical trials, biotech pipeline</div></div>
+        </a>
+        <a class="news-site-card" href="https://www.technologyreview.com" target="_blank">
+          <div class="nsc-logo" style="background:#212121;color:#fff">TR</div>
+          <div class="nsc-info"><div class="nsc-name">MIT Tech Review</div><div class="nsc-desc">AI, biotech, emerging technology</div></div>
+        </a>
+      </div>
+
+      <div class="divl"><span>Business & Markets</span></div>
+      <div class="news-site-grid">
+        <a class="news-site-card" href="https://www.bloomberg.com" target="_blank">
+          <div class="nsc-logo" style="background:#1a1a1a;color:#fff">Bl</div>
+          <div class="nsc-info"><div class="nsc-name">Bloomberg</div><div class="nsc-desc">Markets, finance, global economy</div></div>
+        </a>
+        <a class="news-site-card" href="https://hbr.org" target="_blank">
+          <div class="nsc-logo" style="background:#c62828;color:#fff">HBR</div>
+          <div class="nsc-info"><div class="nsc-name">Harvard Business Review</div><div class="nsc-desc">Strategy, leadership, management</div></div>
+        </a>
+        <a class="news-site-card" href="https://techcrunch.com" target="_blank">
+          <div class="nsc-logo" style="background:#00a651;color:#fff">TC</div>
+          <div class="nsc-info"><div class="nsc-name">TechCrunch</div><div class="nsc-desc">Startups, VC, tech industry</div></div>
+        </a>
+        <a class="news-site-card" href="https://www.axios.com" target="_blank">
+          <div class="nsc-logo" style="background:#6366f1;color:#fff">Ax</div>
+          <div class="nsc-info"><div class="nsc-name">Axios</div><div class="nsc-desc">Smart, concise news briefings</div></div>
+        </a>
+      </div>
+
       <div class="divl"><span>Saved Articles</span></div>
       <div id="saved-arts"></div>
     </div>
@@ -360,22 +432,32 @@
     <input type="hidden" id="crs-status-val">
     <div class="fld"><label>Course Title</label><input id="cr-ti" placeholder="e.g. Drug Discovery Fundamentals"></div>
     <div class="r2">
-      <div class="fld"><label>URL / Link</label><input id="cr-ur" type="url" placeholder="https://..."></div>
-      <div class="fld"><label>Format</label>
+      <div class="fld"><label>Course Type Tag</label><input id="cr-tag" placeholder="e.g. Clinical Research, Python…"></div>
+      <div class="fld"><label>Format / Nature</label>
         <select id="cr-form">
           <option value="Online">Online</option>
           <option value="Onsite">Onsite</option>
           <option value="Hybrid">Hybrid</option>
+          <option value="Self-paced">Self-paced</option>
+          <option value="Bootcamp">Bootcamp</option>
+          <option value="Certificate">Certificate programme</option>
         </select>
       </div>
     </div>
     <div class="r2">
-      <div class="fld"><label>Date / Schedule</label><input id="cr-date" placeholder="e.g. Jan–Mar 2026, Tues 6pm"></div>
-      <div class="fld"><label>Contact Person</label><input id="cr-contact" placeholder="Name or email"></div>
+      <div class="fld"><label>Price / Cost</label><input id="cr-price" placeholder="e.g. Free, ฿15,000, $299/mo"></div>
+      <div class="fld"><label>Duration</label><input id="cr-duration" placeholder="e.g. 8 weeks, 3 months, ongoing"></div>
     </div>
-    <div class="fld"><label>Course Type Tag (write your own)</label><input id="cr-tag" placeholder="e.g. Clinical Research, Biotech MBA, Python…"></div>
+    <div class="r2">
+      <div class="fld"><label>Link / URL</label><input id="cr-ur" type="url" placeholder="https://..."></div>
+      <div class="fld"><label>Date / Schedule</label><input id="cr-date" placeholder="e.g. Jan–Mar 2026, Tues 6pm"></div>
+    </div>
+    <div class="r2">
+      <div class="fld"><label>Contact Person</label><input id="cr-contact" placeholder="Name or email"></div>
+      <div class="fld"></div>
+    </div>
     <div class="fld"><label>Curriculum / Description</label><textarea id="cr-desc" placeholder="What this course covers, key topics, modules…"></textarea></div>
-    <div class="fld"><label>My Notes</label><textarea id="cr-notes" placeholder="Learnings, reflections, action items…"></textarea></div>
+    <div class="fld"><label>My Notes & Learnings</label><textarea id="cr-notes" placeholder="Learnings, reflections, action items…"></textarea></div>
   </div>
   <div class="mfoot"><button class="btn btn-g" data-close="m-crs">Cancel</button><button class="btn btn-p" id="sv-crs">Save</button></div>
 </div>
