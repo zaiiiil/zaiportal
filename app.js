@@ -115,8 +115,8 @@ const WBG = { elliptical:'rgba(139,92,246,.1)', run:'rgba(16,185,129,.1)', incli
 const GCLS  = { career:'p-career', learning:'p-learning', health:'p-health', research:'p-research', personal:'p-personal' };
 const TLBLS = { science:'Science', business:'Business', health:'Health', tech:'Tech', pharma:'Pharma', aitech:'AI & Biotech', general:'General', conference:'Conference', clinical:'Clinical', biotech:'Biotech', bizdev:'BD/VC' };
 const TPILL = { science:'p-sci', business:'p-bus', health:'p-hlth', tech:'p-tech', pharma:'p-pha', aitech:'p-ai', general:'p-gen', conference:'p-conf', clinical:'p-clin', biotech:'p-bio', bizdev:'p-bd' };
-const SLBL  = { applied:'Applied', interview:'Interview', offer:'Offer!', rejected:'Rejected' };
-const SCLS  = { applied:'s-applied', interview:'s-interview', offer:'s-offer', rejected:'s-rejected' };
+const SLBL  = { toapply:'To Apply', applied:'Applied', interview:'Interview', offer:'Offer!', rejected:'Rejected' };
+const SCLS  = { toapply:'s-toapply', applied:'s-applied', interview:'s-interview', offer:'s-offer', rejected:'s-rejected' };
 const CAT_COLORS = { workout:'#8b5cf6', social:'#ec4899', work:'#3b82f6', personal:'#10b981', other:'#f59e0b' };
 const HOURS_DISPLAY = ['6 AM','7 AM','8 AM','9 AM','10 AM','11 AM','12 PM','1 PM','2 PM','3 PM','4 PM','5 PM','6 PM','7 PM','8 PM','9 PM','10 PM'];
 const HOUR_VALS = [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22];
@@ -342,10 +342,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ── APP LOC HELPER ────────────────────────────────────────────────
-function setAppLoc(loc) {
+window.setAppLoc = function(loc) {
   newAppLoc = loc;
-  el('ap-pill-bkk')?.classList.toggle('active', loc==='bkk');
-  el('ap-pill-sgp')?.classList.toggle('active', loc==='sgp');
+  const bkk = el('ap-pill-bkk'), sgp = el('ap-pill-sgp');
+  if(bkk) { bkk.style.background = loc==='bkk'?'rgba(245,158,11,.25)':'rgba(245,158,11,.1)'; bkk.style.borderColor = loc==='bkk'?'rgba(245,158,11,.8)':'rgba(245,158,11,.4)'; bkk.style.fontWeight = loc==='bkk'?'700':'600'; }
+  if(sgp) { sgp.style.background = loc==='sgp'?'rgba(16,185,129,.25)':'#f0fdf4'; sgp.style.borderColor = loc==='sgp'?'#10b981':'#d1fae5'; sgp.style.fontWeight = loc==='sgp'?'700':'600'; }
 }
 
 // ── INIT HELPERS ──────────────────────────────────────────────────
@@ -464,11 +465,69 @@ function renderWorkouts() {
   }
   const wrap=el('wk-list');
   if (!workouts.length) { wrap.innerHTML='<div class="empty">No workouts logged yet</div>'; return; }
-  wrap.innerHTML=[...workouts].sort((a,b)=>b.date.localeCompare(a.date)).map(w=>{
-    const ri=workouts.indexOf(w);
-    return `<div class="glass wcard"><div class="wico" style="background:${WBG[w.type]||'rgba(200,150,220,.1)'}">${WI[w.type]||'[w]'}</div><div class="wbody"><div class="wtitle">${WN[w.type]||w.type}</div><div class="wdl">${fD(w.date)}</div><div class="wmeta">${w.dur?`<div class="ws"><div class="ws-v">${w.dur}</div><div class="ws-l">mins</div></div>`:''} ${w.cal?`<div class="ws"><div class="ws-v" style="background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${w.cal}</div><div class="ws-l">kcal</div></div>`:''} ${w.dist?`<div class="ws"><div class="ws-v" style="color:#10b981">${w.dist.toFixed(1)}</div><div class="ws-l">km</div></div>`:''}</div></div><button class="btn btn-d btn-sm" onclick="dWk(${ri})" style="flex-shrink:0">Delete</button></div>`;
+
+  // Group by month
+  const byMonth = {};
+  [...workouts].sort((a,b)=>b.date.localeCompare(a.date)).forEach(w => {
+    const m = w.date.slice(0,7); // YYYY-MM
+    if (!byMonth[m]) byMonth[m] = [];
+    byMonth[m].push(w);
+  });
+
+  wrap.innerHTML = Object.entries(byMonth).map(([month, mWorkouts]) => {
+    const label = new Date(month+'-01T12:00').toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    // Count by type
+    const typeCounts = {};
+    mWorkouts.forEach(w => { typeCounts[w.type] = (typeCounts[w.type]||0)+1; });
+    const totalCal = mWorkouts.reduce((s,w)=>s+w.cal,0);
+    const totalDur = mWorkouts.reduce((s,w)=>s+w.dur,0);
+    const typeBar = Object.entries(typeCounts).map(([t,n])=>`
+      <div style="display:flex;align-items:center;gap:6px">
+        <div style="width:28px;height:28px;border-radius:8px;background:${WBG[t]||'rgba(168,85,247,.1)'};display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">${WI[t]||'x'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:600;color:var(--t)">${WN[t]||t}</div>
+        </div>
+        <div style="font-family:var(--font-d);font-size:14px;font-weight:700;color:#a855f7">${n}x</div>
+      </div>`).join('');
+    return `<div class="glass" style="overflow:hidden;margin-bottom:.65rem;padding:0">
+      <div style="display:flex;align-items:center;gap:10px;padding:.85rem 1rem;cursor:pointer" onclick="toggleWkMonth('${month}')">
+        <div style="flex:1">
+          <div style="font-family:var(--font-d);font-size:15px;font-weight:700;color:var(--t)">${label}</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px">${mWorkouts.length} session${mWorkouts.length!==1?'s':''}${totalCal?` · ${totalCal.toLocaleString()} kcal`:''}${totalDur?` · ${totalDur} mins`:''}</div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;max-width:60%;justify-content:flex-end">
+          ${Object.entries(typeCounts).map(([t,n])=>`<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${WBG[t]||'rgba(168,85,247,.1)'};color:#7c3aed">${WN[t]||t} ×${n}</span>`).join('')}
+        </div>
+        <div id="wk-arrow-${month}" style="font-size:13px;color:var(--t3);transition:transform .2s;flex-shrink:0">v</div>
+      </div>
+      <div id="wk-month-${month}" style="display:none;border-top:1px solid #f5f0ff;padding:.75rem 1rem">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:12px">${typeBar}</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          ${mWorkouts.map(w=>{
+            const ri=workouts.indexOf(w);
+            return `<div style="display:flex;align-items:center;gap:.65rem;padding:6px 0;border-bottom:1px solid #f9f5ff">
+              <div style="width:28px;height:28px;border-radius:8px;background:${WBG[w.type]||'rgba(168,85,247,.1)'};display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">${WI[w.type]||'x'}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12px;font-weight:600;color:var(--t)">${WN[w.type]||w.type}</div>
+                <div style="font-size:10px;color:var(--t3)">${fD(w.date)}${w.dur?' · '+w.dur+'min':''}${w.cal?' · '+w.cal+'kcal':''}${w.dist?' · '+w.dist.toFixed(1)+'km':''}</div>
+              </div>
+              <button class="btn btn-d btn-sm" onclick="dWk(${ri})" style="flex-shrink:0;font-size:11px;padding:2px 8px">x</button>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
   }).join('');
 }
+
+window.toggleWkMonth = month => {
+  const body = el('wk-month-'+month);
+  const arrow = el('wk-arrow-'+month);
+  if (!body) return;
+  const open = body.style.display === 'block';
+  body.style.display = open ? 'none' : 'block';
+  if (arrow) arrow.style.transform = open ? '' : 'rotate(180deg)';
+};
 
 // ── CALENDAR ──────────────────────────────────────────────────────
 function calWeekDates(offset) {
@@ -703,6 +762,7 @@ function renderApps() {
   const by = s => apps.filter(a=>a.status===s).length;
   el('app-stats').innerHTML = apps.length ? `
     <div class="sc"><div class="sc-lbl">Total</div><div class="sc-val">${apps.length}</div></div>
+    <div class="sc"><div class="sc-lbl">To Apply</div><div class="sc-val" style="color:#8b5cf6">${by('toapply')}</div></div>
     <div class="sc"><div class="sc-lbl">Bangkok</div><div class="sc-val" style="color:#f59e0b">${bkkCount}</div></div>
     <div class="sc"><div class="sc-lbl">Singapore</div><div class="sc-val" style="color:#10b981">${sgpCount}</div></div>
     <div class="sc"><div class="sc-lbl">Interview</div><div class="sc-val" style="color:#d97706">${by('interview')}</div></div>
@@ -728,16 +788,18 @@ function renderApps() {
       { id:'int', label:'Interview Notes', content:a.int },
       { id:'no', label:'Notes', content:a.notes }
     ].filter(t => t.content);
-    return `<div class="glass app-row" style="flex-direction:column;padding:0;overflow:hidden">
+    const isToapply = a.status==='toapply';
+    return `<div class="glass app-row" style="flex-direction:column;padding:0;overflow:hidden;${isToapply?'border-left:3px solid #8b5cf6':''}">
       <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.9rem 1rem">
-        <div class="a-init">${init}</div>
+        ${isToapply?`<div style="flex-shrink:0;padding-top:2px"><div onclick="markApplied(${a.id})" title="Check when you've applied" style="width:20px;height:20px;border-radius:6px;border:2px solid #8b5cf6;background:#faf5ff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s" onmouseover="this.style.background='#ede9fe'" onmouseout="this.style.background='#faf5ff'"></div></div>`:''}
+        <div class="a-init" style="${isToapply?'background:rgba(139,92,246,.15);color:#7c3aed':''}">${init}</div>
         <div class="ab" style="flex:1;min-width:0">
           <div class="at">${a.url?`<a href="${a.url}" target="_blank" style="color:var(--t);text-decoration:none;font-weight:600">${a.role}</a>`:a.role}</div>
           <div class="ac">${a.company}</div>
           <div style="display:flex;gap:6px;align-items:center;margin-top:5px;flex-wrap:wrap">
             <span class="status ${SCLS[a.status]||''}">${SLBL[a.status]||a.status}</span>
             ${locBadge(a.loc)}
-            <span style="font-size:11px;color:var(--t3)">Applied ${fD(a.date)}</span>
+            ${isToapply?`<span style="font-size:11px;color:#8b5cf6;font-style:italic">Tap checkbox when applied</span>`:`<span style="font-size:11px;color:var(--t3)">Applied ${fD(a.date)}</span>`}
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;align-items:flex-end">
@@ -772,6 +834,14 @@ window.toggleAppDet = id => {
   const det = el('app-det-'+id);
   if (!det) return;
   det.style.display = det.style.display === 'none' ? 'block' : 'none';
+};
+window.markApplied = async id => {
+  const a = apps.find(x=>x.id===id); if(!a) return;
+  const dateStr = prompt('Date applied (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+  if(dateStr===null) return;
+  a.status = 'applied';
+  a.date = dateStr || a.date;
+  await save(); renderApps();
 };
 window.appDetTab = (id, tab) => {
   document.querySelectorAll(`#app-det-${id} .adp`).forEach(p => p.style.display='none');
