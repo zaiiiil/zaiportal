@@ -716,7 +716,16 @@ function renderCourses() {
 
           <div id="crs-tp-${c.id}-notes" class="crs-tpanel" style="display:${!detailTabs.filter(t=>t.val).length?'block':'none'};padding:.75rem 1rem">
             ${c.desc?`<div style="font-size:12px;color:var(--t2);background:#f9f8ff;border:1px solid #f0ebff;border-radius:8px;padding:.55rem .8rem;margin-bottom:8px;line-height:1.5"><span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--t3);display:block;margin-bottom:3px">Curriculum</span>${c.desc}</div>`:''}
-            <textarea style="width:100%;padding:8px 11px;border:1.5px solid #f0ebff;border-radius:10px;font-family:var(--font);font-size:12px;color:var(--t2);background:#faf8ff;resize:vertical;min-height:80px;line-height:1.5" placeholder="Notes, learnings, action items..." onchange="saveCrsNotes(${c.id},this.value)">${c.notes||''}</textarea>
+            ${(()=>{
+              let mods = []; try { mods = c.notesModules ? JSON.parse(c.notesModules) : []; } catch {}
+              const preview = mods.length
+                ? mods.map(m=>`<div style="display:flex;align-items:center;gap:6px;padding:4px 0"><div style="width:8px;height:8px;border-radius:50%;background:${m.done?'#10b981':'#d8b4fe'};flex-shrink:0"></div><span style="font-size:12px;color:var(--t2)">${m.title||'Untitled'}</span>${m.done?'<span style="font-size:10px;color:#10b981;font-weight:600">done</span>':''}</div>`).join('')
+                : '<div style="font-size:12px;color:var(--t3);font-style:italic">No modules yet — click to start writing</div>';
+              return `<div style="background:#faf8ff;border:1px solid #f0ebff;border-radius:10px;padding:.65rem .85rem;margin-bottom:10px">${preview}</div>`;
+            })()}
+            <button onclick="openCrsNotes(${c.id})" style="width:100%;padding:10px;background:linear-gradient(135deg,rgba(168,85,247,.08),rgba(139,92,246,.12));border:1.5px solid #e9d5ff;border-radius:10px;font-size:13px;font-weight:600;color:#7c3aed;cursor:pointer;transition:all .15s;text-align:center" onmouseover="this.style.background='rgba(168,85,247,.18)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(168,85,247,.08),rgba(139,92,246,.12))'">
+              Open Notes Editor
+            </button>
           </div>
 
           <div style="display:flex;justify-content:flex-end;padding:.5rem 1rem .8rem;border-top:1px solid #f5f0ff">
@@ -847,3 +856,145 @@ window.appDetTab = (id, tab) => {
   document.querySelectorAll(`#app-det-${id} .adp`).forEach(p => p.style.display='none');
   el(`adp-${id}-${tab}`).style.display = 'block';
 };
+
+// ══════════════════════════════════════════════════════
+// COURSE NOTES EDITOR — full-page overlay per course
+// ══════════════════════════════════════════════════════
+let notesEditorCrsId = null;
+
+window.openCrsNotes = id => {
+  const c = courses.find(x=>x.id===id); if(!c) return;
+  notesEditorCrsId = id;
+  const overlay = el('crs-notes-overlay');
+  el('crs-notes-title').textContent = c.title;
+  // Parse saved modules or create default
+  let modules = [];
+  try { modules = c.notesModules ? JSON.parse(c.notesModules) : []; } catch {}
+  if (!modules.length) modules = [{ id: Date.now(), title: 'General Notes', content: c.notes||'', summary:'', done:false }];
+  renderNotesEditor(modules);
+  overlay.classList.add('open');
+};
+
+window.closeCrsNotes = async () => {
+  await saveNotesEditor();
+  el('crs-notes-overlay').classList.remove('open');
+  notesEditorCrsId = null;
+};
+
+function renderNotesEditor(modules) {
+  const wrap = el('crs-notes-modules');
+  wrap.innerHTML = modules.map((m,i) => `
+    <div class="crs-module" data-mid="${m.id}" style="background:#fff;border:1px solid #f0ebff;border-radius:14px;overflow:hidden;margin-bottom:1rem">
+      <!-- Module header -->
+      <div style="display:flex;align-items:center;gap:10px;padding:.75rem 1rem;background:${m.done?'rgba(16,185,129,.06)':'#faf8ff'};border-bottom:1px solid #f0ebff">
+        <div onclick="toggleModuleDone(${m.id})" style="width:20px;height:20px;border-radius:6px;border:2px solid ${m.done?'#10b981':'#d8b4fe'};background:${m.done?'#10b981':'transparent'};cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s">
+          ${m.done?'<div style="color:#fff;font-size:12px;font-weight:700">v</div>':''}
+        </div>
+        <input class="module-title-input" data-mid="${m.id}" value="${(m.title||'').replace(/"/g,'&quot;')}" placeholder="Module name..." style="flex:1;border:none;background:transparent;font-family:var(--font);font-size:14px;font-weight:700;color:var(--t);outline:none;min-width:0" oninput="markNotesChanged()">
+        ${m.done?'<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(16,185,129,.15);color:#065f46">Done</span>':''}
+        <button onclick="deleteModule(${m.id})" style="background:none;border:none;color:#d4d0e8;cursor:pointer;font-size:16px;padding:0 4px;line-height:1" title="Delete module">x</button>
+      </div>
+      <!-- Rich text toolbar -->
+      <div style="display:flex;gap:4px;padding:6px 10px;background:#f9f8ff;border-bottom:1px solid #f0ebff;flex-wrap:wrap">
+        <button class="rt-btn" onclick="rtCmd('bold')" title="Bold" style="font-weight:700">B</button>
+        <button class="rt-btn" onclick="rtCmd('italic')" title="Italic" style="font-style:italic">I</button>
+        <button class="rt-btn" onclick="rtCmd('underline')" title="Underline" style="text-decoration:underline">U</button>
+        <div style="width:1px;background:#e8e3f5;margin:0 2px"></div>
+        <button class="rt-btn" onclick="insertBullet(${m.id})" title="Bullet point">• list</button>
+        <button class="rt-btn" onclick="insertSummaryBox(${m.id})" title="Summary box">[ summary ]</button>
+        <div style="width:1px;background:#e8e3f5;margin:0 2px"></div>
+        <span style="font-size:10px;color:var(--t3);align-self:center;margin-left:2px">Highlight:</span>
+        <button class="rt-btn hl-btn" onclick="rtHighlight('#fef08a')" style="background:#fef08a;border-color:#fde047" title="Yellow">Y</button>
+        <button class="rt-btn hl-btn" onclick="rtHighlight('#bbf7d0')" style="background:#bbf7d0;border-color:#86efac" title="Green">G</button>
+        <button class="rt-btn hl-btn" onclick="rtHighlight('#bfdbfe')" style="background:#bfdbfe;border-color:#93c5fd" title="Blue">B</button>
+        <button class="rt-btn hl-btn" onclick="rtHighlight('#fecaca')" style="background:#fecaca;border-color:#fca5a5" title="Red">R</button>
+        <button class="rt-btn hl-btn" onclick="rtHighlight('#e9d5ff')" style="background:#e9d5ff;border-color:#d8b4fe" title="Purple">P</button>
+        <button class="rt-btn" onclick="rtHighlight('transparent')" title="Remove highlight" style="font-size:10px">clear</button>
+      </div>
+      <!-- Editable content area -->
+      <div class="module-content" data-mid="${m.id}" contenteditable="true"
+        style="min-height:120px;padding:1rem;font-size:13px;line-height:1.8;color:var(--t2);outline:none;font-family:var(--font)"
+        oninput="markNotesChanged()" onfocus="setActiveModule(${m.id})">${m.content||'<p>Start typing your notes here...</p>'}</div>
+      <!-- Summary box -->
+      <div style="padding:.75rem 1rem;border-top:1px solid #f0ebff;background:#f9f8ff">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a855f7;margin-bottom:5px">Module Summary</div>
+        <div class="module-summary" data-mid="${m.id}" contenteditable="true"
+          style="min-height:48px;font-size:12px;line-height:1.6;color:var(--t2);outline:none;font-family:var(--font);background:rgba(168,85,247,.04);border-radius:8px;padding:.5rem .75rem;border:1px dashed #e9d5ff"
+          oninput="markNotesChanged()" onfocus="setActiveModule(${m.id})"
+          placeholder="Key takeaways from this module...">${m.summary||''}</div>
+      </div>
+    </div>`).join('');
+}
+
+let activeModuleId = null;
+let notesChanged = false;
+window.setActiveModule = id => { activeModuleId = id; };
+window.markNotesChanged = () => { notesChanged = true; el('notes-save-badge')?.classList.add('unsaved'); };
+
+window.rtCmd = cmd => { document.execCommand(cmd, false, null); };
+window.rtHighlight = color => { document.execCommand('hiliteColor', false, color); };
+window.insertBullet = mid => {
+  const area = document.querySelector(`.module-content[data-mid="${mid}"]`);
+  if (area) { area.focus(); document.execCommand('insertUnorderedList', false, null); }
+};
+window.insertSummaryBox = mid => {
+  const area = document.querySelector(`.module-content[data-mid="${mid}"]`);
+  if (!area) return;
+  area.focus();
+  document.execCommand('insertHTML', false,
+    '<div style="background:rgba(168,85,247,.08);border-left:3px solid #a855f7;border-radius:0 8px 8px 0;padding:.5rem .75rem;margin:.5rem 0;font-size:12px;color:#6d28d9"><strong>Summary:</strong> Write key point here</div><p></p>');
+};
+
+window.toggleModuleDone = id => {
+  const modules = collectModules();
+  const m = modules.find(x=>x.id===id);
+  if (m) { m.done = !m.done; renderNotesEditor(modules); markNotesChanged(); }
+};
+window.deleteModule = id => {
+  if (!confirm('Delete this module?')) return;
+  const modules = collectModules().filter(x=>x.id!==id);
+  renderNotesEditor(modules); markNotesChanged();
+};
+window.addModule = () => {
+  const modules = collectModules();
+  modules.push({ id:Date.now(), title:'New Module', content:'', summary:'', done:false });
+  renderNotesEditor(modules); markNotesChanged();
+  // Scroll to bottom
+  setTimeout(()=>{ const wrap=el('crs-notes-modules'); wrap.lastElementChild?.scrollIntoView({behavior:'smooth'}); },100);
+};
+
+function collectModules() {
+  const modules = [];
+  document.querySelectorAll('.crs-module').forEach(card => {
+    const mid = +card.dataset.mid;
+    const titleEl = card.querySelector('.module-title-input');
+    const contentEl = card.querySelector('.module-content');
+    const summaryEl = card.querySelector('.module-summary');
+    // Check done state from header
+    const doneEl = card.querySelector('[style*="border:2px solid"]');
+    const done = doneEl ? doneEl.style.background.includes('10b981') : false;
+    modules.push({
+      id: mid,
+      title: titleEl?.value||'',
+      content: contentEl?.innerHTML||'',
+      summary: summaryEl?.innerHTML||'',
+      done
+    });
+  });
+  return modules;
+}
+
+async function saveNotesEditor() {
+  if (!notesEditorCrsId) return;
+  const c = courses.find(x=>x.id===notesEditorCrsId); if(!c) return;
+  const modules = collectModules();
+  c.notesModules = JSON.stringify(modules);
+  // Also keep plain text notes for backward compat
+  c.notes = modules.map(m=>m.title+': '+m.content.replace(/<[^>]+>/g,' ').trim()).join('\n\n');
+  await save();
+  notesChanged = false;
+  el('notes-save-badge')?.classList.remove('unsaved');
+}
+
+// Auto-save every 30 seconds while editor is open
+setInterval(async () => { if(notesChanged && notesEditorCrsId) await saveNotesEditor(); }, 30000);
