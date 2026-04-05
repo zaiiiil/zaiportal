@@ -332,3 +332,7 @@ a.ct:hover { color: var(--purple); }
 .module-summary:empty:before { content: attr(placeholder); color: #c4b5fd; font-style: italic; }
 .module-content:empty:before { content: 'Start typing your notes here...'; color: #c4b5fd; font-style: italic; }
 #notes-save-badge.unsaved { color: #f59e0b; font-style: normal; font-weight: 600; }
+
+/* Course notes full-screen modal */
+#m-crs-notes.open { display: flex !important; }
+#notes-save-badge.unsaved { color: #f59e0b; font-style: normal; font-weight: 600; }
