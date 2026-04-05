@@ -903,18 +903,23 @@ window.openCrsNotes = id => {
   const c = courses.find(x=>x.id===id); if(!c) return;
   notesEditorCrsId = id;
   const overlay = el('crs-notes-overlay');
+  if (!overlay) { alert('Notes overlay not found — try refreshing'); return; }
   el('crs-notes-title').textContent = c.title;
-  // Parse saved modules or create default
   let modules = [];
-  try { modules = c.notesModules ? JSON.parse(c.notesModules) : []; } catch {}
+  try { modules = c.notesModules ? JSON.parse(c.notesModules) : []; } catch(e) {}
   if (!modules.length) modules = [{ id: Date.now(), title: 'General Notes', content: c.notes||'', summary:'', done:false }];
   renderNotesEditor(modules);
+  // Force display regardless of any inline style
+  overlay.style.display = 'block';
   overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
 };
 
 window.closeCrsNotes = async () => {
   await saveNotesEditor();
-  el('crs-notes-overlay').classList.remove('open');
+  const overlay = el('crs-notes-overlay');
+  if (overlay) { overlay.style.display = 'none'; overlay.classList.remove('open'); }
+  document.body.style.overflow = '';
   notesEditorCrsId = null;
 };
 
