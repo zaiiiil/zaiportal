@@ -307,3 +307,28 @@ a.ct:hover { color: var(--purple); }
 .nsc-info { min-width: 0; }
 .nsc-name { font-size: 12px; font-weight: 700; color: var(--t); }
 .nsc-desc { font-size: 10px; color: var(--t3); margin-top: 1px; line-height: 1.3; }
+
+/* ── COURSE NOTES OVERLAY ────────────────────────────── */
+#crs-notes-overlay { display: none; }
+#crs-notes-overlay.open { display: block; }
+.rt-btn {
+  padding: 3px 9px;
+  border: 1px solid #e9d5ff;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--t2);
+  cursor: pointer;
+  transition: all .12s;
+  line-height: 1.4;
+}
+.rt-btn:hover { background: #f3e8ff; border-color: #d8b4fe; color: #7c3aed; }
+.hl-btn { font-size: 10px; font-weight: 700; }
+.module-content:focus { background: #fdfcff; }
+.module-content ul { padding-left: 1.2rem; margin: .3rem 0; }
+.module-content li { margin: .15rem 0; }
+.module-content p { margin: .2rem 0; }
+.module-summary:empty:before { content: attr(placeholder); color: #c4b5fd; font-style: italic; }
+.module-content:empty:before { content: 'Start typing your notes here...'; color: #c4b5fd; font-style: italic; }
+#notes-save-badge.unsaved { color: #f59e0b; font-style: normal; font-weight: 600; }
