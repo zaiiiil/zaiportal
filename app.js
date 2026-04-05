@@ -657,32 +657,70 @@ function renderMeds() {
 }
 
 // ── COURSES — collapsible cards with detail tabs ─────────────────
+function crsModulePreview(c) {
+  let mods = [];
+  try { mods = c.notesModules ? JSON.parse(c.notesModules) : []; } catch(e) {}
+  if (!mods.length) return '<div style="font-size:12px;color:var(--t3);font-style:italic">No modules yet — click Open Notes to start writing</div>';
+  return mods.map(m=>`<div style="display:flex;align-items:center;gap:6px;padding:3px 0"><div style="width:7px;height:7px;border-radius:50%;background:${m.done?'#10b981':'#d8b4fe'};flex-shrink:0"></div><span style="font-size:12px;color:var(--t2)">${m.title||'Untitled'}</span>${m.done?'<span style="font-size:10px;color:#10b981;font-weight:600;margin-left:4px">done</span>':''}</div>`).join('');
+}
+
 function renderCourses() {
-  const renderList=(list,wrapId)=>{
-    const wrap=el(wrapId);
-    if (!list.length) { wrap.innerHTML='<div class="empty">None here yet</div>'; return; }
-    wrap.innerHTML=list.map(c=>{
-      const statusBg = c.status==='following'?'rgba(16,185,129,.12)':'rgba(139,92,246,.12)';
-      const statusCl = c.status==='following'?'#065f46':'#5b21b6';
-      const fmtBg    = c.form==='Online'?'rgba(59,130,246,.1)':c.form==='Onsite'?'rgba(16,185,129,.1)':'rgba(245,158,11,.1)';
-      const fmtCl    = c.form==='Online'?'#1e3a8a':c.form==='Onsite'?'#065f46':'#92400e';
+  const renderList = (list, wrapId) => {
+    const wrap = el(wrapId);
+    if (!list.length) { wrap.innerHTML = '<div class="empty">None here yet</div>'; return; }
+    wrap.innerHTML = list.map(c => {
+      const statusBg = c.status==='following' ? 'rgba(16,185,129,.12)' : 'rgba(139,92,246,.12)';
+      const statusCl = c.status==='following' ? '#065f46' : '#5b21b6';
+      const fmtBg = c.form==='Online' ? 'rgba(59,130,246,.1)' : c.form==='Onsite' ? 'rgba(16,185,129,.1)' : 'rgba(245,158,11,.1)';
+      const fmtCl = c.form==='Online' ? '#1e3a8a' : c.form==='Onsite' ? '#065f46' : '#92400e';
+
+      // Which detail tabs have content
       const detailTabs = [
-        { id:'price',    label:'Price',    val: c.price    || c.priceVal || '' },
-        { id:'duration', label:'Duration', val: c.duration || c.dur || '' },
+        { id:'price',    label:'Price',    val: c.price || '' },
+        { id:'duration', label:'Duration', val: c.duration || '' },
         { id:'nature',   label:'Nature',   val: [c.form, c.tag].filter(Boolean).join(' - ') || '' },
         { id:'link',     label:'Link',     val: c.url || '' },
-      ];
+      ].filter(t => t.val);
+
+      // Notes is always the last tab, active if no other tabs have content
+      const notesIsFirst = detailTabs.length === 0;
+
+      // Build tab buttons
+      const tabBtns = [
+        ...detailTabs.map((t, i) => `<button class="crs-dtab" data-cid="${c.id}" data-tab="${t.id}"
+          style="padding:7px 14px;font-size:11px;font-weight:600;background:none;border:none;border-bottom:2px solid ${i===0&&!notesIsFirst?'#a855f7':'transparent'};color:${i===0&&!notesIsFirst?'#a855f7':'var(--t3)'};cursor:pointer;white-space:nowrap;flex-shrink:0"
+          onclick="crsDetailTab(${c.id},'${t.id}',this)">${t.label}</button>`),
+        `<button class="crs-dtab" data-cid="${c.id}" data-tab="notes"
+          style="padding:7px 14px;font-size:11px;font-weight:600;background:none;border:none;border-bottom:2px solid ${notesIsFirst?'#a855f7':'transparent'};color:${notesIsFirst?'#a855f7':'var(--t3)'};cursor:pointer;white-space:nowrap;flex-shrink:0"
+          onclick="crsDetailTab(${c.id},'notes',this)">Notes & Learnings</button>`
+      ].join('');
+
+      // Build tab panels
+      const tabPanels = [
+        ...detailTabs.map((t, i) => `<div id="crs-tp-${c.id}-${t.id}" style="display:${i===0&&!notesIsFirst?'block':'none'};padding:.85rem 1rem">
+          ${t.id==='link'
+            ? `<a href="${t.val}" target="_blank" style="color:#a855f7;font-size:13px;word-break:break-all">${t.val}</a>`
+            : `<div style="font-size:13px;color:var(--t2);line-height:1.6">${t.val}</div>`}
+        </div>`),
+        `<div id="crs-tp-${c.id}-notes" style="display:${notesIsFirst?'block':'none'};padding:.75rem 1rem">
+          ${c.desc ? `<div style="font-size:12px;color:var(--t2);background:#f9f8ff;border:1px solid #f0ebff;border-radius:8px;padding:.55rem .8rem;margin-bottom:10px;line-height:1.5"><span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--t3);display:block;margin-bottom:3px">Curriculum</span>${c.desc}</div>` : ''}
+          <div style="background:#faf8ff;border:1px solid #f0ebff;border-radius:10px;padding:.65rem .85rem;margin-bottom:10px">${crsModulePreview(c)}</div>
+          <button onclick="openCrsNotes(${c.id})" style="width:100%;padding:10px;background:rgba(168,85,247,.08);border:1.5px solid #e9d5ff;border-radius:10px;font-size:13px;font-weight:600;color:#7c3aed;cursor:pointer">
+            Open Notes Editor
+          </button>
+        </div>`
+      ].join('');
+
       return `<div class="glass" style="overflow:hidden;margin-bottom:.6rem;padding:0">
-        <!-- Header row — always visible, click to toggle -->
         <div style="display:flex;align-items:center;gap:10px;padding:.9rem 1rem;cursor:pointer" onclick="toggleCrsExpand(${c.id})">
           <div style="flex:1;min-width:0">
             <div style="font-size:14px;font-weight:700;color:var(--t);margin-bottom:4px">${c.title}</div>
             <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
               <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${statusBg};color:${statusCl}">${c.status==='following'?'Following':'Interested'}</span>
-              ${c.form?`<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${fmtBg};color:${fmtCl}">${c.form}</span>`:''}
-              ${c.tag?`<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(139,92,246,.1);color:#5b21b6">${c.tag}</span>`:''}
-              ${c.price?`<span style="font-size:10px;color:var(--t3)">${c.price}</span>`:''}
-              ${c.duration?`<span style="font-size:10px;color:var(--t3)">${c.duration}</span>`:''}
+              ${c.form ? `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${fmtBg};color:${fmtCl}">${c.form}</span>` : ''}
+              ${c.tag ? `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(139,92,246,.1);color:#5b21b6">${c.tag}</span>` : ''}
+              ${c.price ? `<span style="font-size:10px;color:var(--t3)">${c.price}</span>` : ''}
+              ${c.duration ? `<span style="font-size:10px;color:var(--t3)">${c.duration}</span>` : ''}
             </div>
           </div>
           <div style="display:flex;gap:5px;flex-shrink:0" onclick="event.stopPropagation()">
@@ -691,43 +729,9 @@ function renderCourses() {
           </div>
           <div id="crs-arrow-${c.id}" style="font-size:13px;color:var(--t3);transition:transform .2s;flex-shrink:0">v</div>
         </div>
-
-        <!-- Expanded content -->
         <div id="crs-body-${c.id}" style="display:none;border-top:1px solid #f5f0ff">
-
-          <!-- Detail tabs: Price / Duration / Nature / Link -->
-          <div style="display:flex;border-bottom:1px solid #f5f0ff;overflow-x:auto;scrollbar-width:none">
-            ${detailTabs.filter(t=>t.val).map((t,i)=>`
-              <button class="crs-dtab" data-cid="${c.id}" data-tab="${t.id}"
-                style="padding:7px 14px;font-size:11px;font-weight:600;background:none;border:none;border-bottom:2px solid ${i===0?'#a855f7':'transparent'};color:${i===0?'#a855f7':'var(--t3)'};cursor:pointer;white-space:nowrap;flex-shrink:0"
-                onclick="crsDetailTab(${c.id},'${t.id}',this)">${t.label}</button>`).join('')}
-            <button class="crs-dtab" data-cid="${c.id}" data-tab="notes"
-              style="padding:7px 14px;font-size:11px;font-weight:600;background:none;border:none;border-bottom:2px solid ${!detailTabs.filter(t=>t.val).length?'#a855f7':'transparent'};color:${!detailTabs.filter(t=>t.val).length?'#a855f7':'var(--t3)'};cursor:pointer;white-space:nowrap;flex-shrink:0"
-              onclick="crsDetailTab(${c.id},'notes',this)">Notes & Learnings</button>
-          </div>
-
-          <!-- Tab panels -->
-          ${detailTabs.filter(t=>t.val).map((t,i)=>`
-            <div id="crs-tp-${c.id}-${t.id}" class="crs-tpanel" style="display:${i===0?'block':'none'};padding:.85rem 1rem">
-              ${t.id==='link'
-                ? `<a href="${t.val}" target="_blank" style="color:#a855f7;font-size:13px;word-break:break-all">${t.val}</a>`
-                : `<div style="font-size:13px;color:var(--t2);line-height:1.6">${t.val}</div>`}
-            </div>`).join('')}
-
-          <div id="crs-tp-${c.id}-notes" class="crs-tpanel" style="display:${!detailTabs.filter(t=>t.val).length?'block':'none'};padding:.75rem 1rem">
-            ${c.desc?`<div style="font-size:12px;color:var(--t2);background:#f9f8ff;border:1px solid #f0ebff;border-radius:8px;padding:.55rem .8rem;margin-bottom:8px;line-height:1.5"><span style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--t3);display:block;margin-bottom:3px">Curriculum</span>${c.desc}</div>`:''}
-            ${(()=>{
-              let mods = []; try { mods = c.notesModules ? JSON.parse(c.notesModules) : []; } catch {}
-              const preview = mods.length
-                ? mods.map(m=>`<div style="display:flex;align-items:center;gap:6px;padding:4px 0"><div style="width:8px;height:8px;border-radius:50%;background:${m.done?'#10b981':'#d8b4fe'};flex-shrink:0"></div><span style="font-size:12px;color:var(--t2)">${m.title||'Untitled'}</span>${m.done?'<span style="font-size:10px;color:#10b981;font-weight:600">done</span>':''}</div>`).join('')
-                : '<div style="font-size:12px;color:var(--t3);font-style:italic">No modules yet — click to start writing</div>';
-              return `<div style="background:#faf8ff;border:1px solid #f0ebff;border-radius:10px;padding:.65rem .85rem;margin-bottom:10px">${preview}</div>`;
-            })()}
-            <button onclick="openCrsNotes(${c.id})" style="width:100%;padding:10px;background:linear-gradient(135deg,rgba(168,85,247,.08),rgba(139,92,246,.12));border:1.5px solid #e9d5ff;border-radius:10px;font-size:13px;font-weight:600;color:#7c3aed;cursor:pointer;transition:all .15s;text-align:center" onmouseover="this.style.background='rgba(168,85,247,.18)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(168,85,247,.08),rgba(139,92,246,.12))'">
-              Open Notes Editor
-            </button>
-          </div>
-
+          <div style="display:flex;border-bottom:1px solid #f5f0ff;overflow-x:auto;scrollbar-width:none">${tabBtns}</div>
+          ${tabPanels}
           <div style="display:flex;justify-content:flex-end;padding:.5rem 1rem .8rem;border-top:1px solid #f5f0ff">
             <button class="btn btn-g btn-sm" onclick="toggleCrsStatus(${c.id})">${c.status==='following'?'Move to Interested':'Move to Following'}</button>
           </div>
@@ -748,9 +752,14 @@ window.toggleCrsExpand = id => {
   if (arrow) arrow.style.transform = open ? '' : 'rotate(180deg)';
 };
 window.crsDetailTab = (id, tab, btn) => {
-  document.querySelectorAll(`[id^="crs-tp-${id}-"]`).forEach(p => p.style.display='none');
-  el(`crs-tp-${id}-${tab}`).style.display = 'block';
-  document.querySelectorAll(`.crs-dtab[data-cid="${id}"]`).forEach(b => {
+  // Hide all panels for this course by querying the parent body div
+  const body = el('crs-body-'+id);
+  if (!body) return;
+  body.querySelectorAll('[id^="crs-tp-"]').forEach(p => p.style.display='none');
+  const target = el('crs-tp-'+id+'-'+tab);
+  if (target) target.style.display = 'block';
+  // Reset all tab buttons for this course
+  body.querySelectorAll('.crs-dtab').forEach(b => {
     b.style.borderBottomColor = 'transparent'; b.style.color = 'var(--t3)';
   });
   btn.style.borderBottomColor = '#a855f7'; btn.style.color = '#a855f7';
