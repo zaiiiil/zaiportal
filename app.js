@@ -902,29 +902,24 @@ let notesEditorCrsId = null;
 window.openCrsNotes = id => {
   const c = courses.find(x=>x.id===id); if(!c) return;
   notesEditorCrsId = id;
-  const overlay = el('crs-notes-overlay');
-  if (!overlay) { alert('Notes overlay not found — try refreshing'); return; }
+  const modal = el('m-crs-notes');
+  if (!modal) { alert('Notes modal not found — please hard refresh (Ctrl+Shift+R)'); return; }
   el('crs-notes-title').textContent = c.title;
   let modules = [];
   try { modules = c.notesModules ? JSON.parse(c.notesModules) : []; } catch(e) {}
   if (!modules.length) modules = [{ id: Date.now(), title: 'General Notes', content: c.notes||'', summary:'', done:false }];
   renderNotesEditor(modules);
-  // Force display regardless of any inline style
-  overlay.style.display = 'block';
-  overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
+  openM('m-crs-notes');
 };
 
 window.closeCrsNotes = async () => {
   await saveNotesEditor();
-  const overlay = el('crs-notes-overlay');
-  if (overlay) { overlay.style.display = 'none'; overlay.classList.remove('open'); }
-  document.body.style.overflow = '';
+  closeM('m-crs-notes');
   notesEditorCrsId = null;
 };
 
 function renderNotesEditor(modules) {
-  const wrap = el('crs-notes-modules');
+  const wrap = el('crs-notes-modules'); if(!wrap) return;
   wrap.innerHTML = modules.map((m,i) => `
     <div class="crs-module" data-mid="${m.id}" style="background:#fff;border:1px solid #f0ebff;border-radius:14px;overflow:hidden;margin-bottom:1rem">
       <!-- Module header -->
