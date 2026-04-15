@@ -34,7 +34,7 @@ async function loadFromFirebase() {
       meds     = d.meds     || [];
       courses  = d.courses  || [];
       confs    = d.confs    || [];
-      apps     = d.apps     || [];
+      apps, todos, cvSections, roadmap, watchlist, masters     = d.apps     || [];
       calEvs   = d.calEvs   || [];
       wkGoal   = d.wkGoal   || 4;
     } else {
@@ -94,6 +94,11 @@ let meds     = [];
 let courses  = [];
 let confs    = [];
 let apps     = [];
+let todos    = [];
+let cvSections = [];
+let roadmap    = [];
+let watchlist  = [];
+let masters    = [];
 let calEvs   = [];
 let wkGoal   = 4;
 
@@ -1035,3 +1040,399 @@ async function saveNotesEditor() {
 
 // Auto-save every 30 seconds while editor is open
 setInterval(async () => { if(notesChanged && notesEditorCrsId) await saveNotesEditor(); }, 30000);
+
+// ══════════════════════════════════════════════════════
+// CAREER SECTION
+// ══════════════════════════════════════════════════════
+
+// ── CV & Profile ─────────────────────────────────────
+let editCvId = null;
+const CV_CAT_COLORS = { skill:'#a855f7', apply:'#3b82f6', network:'#10b981', study:'#f59e0b', milestone:'#ec4899' };
+
+function renderCvSections() {
+  const wrap = el('cv-sections-list'); if(!wrap) return;
+  if(!cvSections.length) {
+    wrap.innerHTML = `<div class="empty">No CV sections yet — add your LinkedIn headline, profile summary, job title, etc.</div>
+    <div class="glass" style="padding:1rem;margin-top:.75rem;background:rgba(168,85,247,.03);border:1px solid #e9d5ff;border-radius:12px">
+      <div style="font-size:12px;font-weight:700;color:#7c3aed;margin-bottom:6px">Suggested sections to add:</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.8">LinkedIn Headline · LinkedIn About · CV Profile Summary · Current Job Title · Key Skills · Career Objective</div>
+    </div>`;
+    return;
+  }
+  wrap.innerHTML = cvSections.map(s => `
+    <div class="glass" style="padding:0;overflow:hidden;margin-bottom:.65rem">
+      <div style="display:flex;align-items:center;gap:10px;padding:.85rem 1rem;border-bottom:1px solid #f5f0ff">
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700;color:var(--t)">${s.name}</div>
+          ${s.date?`<div style="font-size:11px;color:var(--t3)">Updated ${fD(s.date)}</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-g btn-sm" onclick="editCvSection(${s.id})">Edit</button>
+          <button class="btn btn-d btn-sm" onclick="dCvSection(${s.id})">x</button>
+        </div>
+      </div>
+      ${s.content?`<div style="padding:.75rem 1rem;font-size:13px;color:var(--t2);line-height:1.6;white-space:pre-wrap;background:#faf8ff;border-bottom:1px solid #f5f0ff">${s.content}</div>`:''}
+      ${s.notes?`<div style="padding:.65rem 1rem;font-size:12px;color:#a855f7;background:rgba(168,85,247,.04)"><span style="font-weight:700">Notes: </span>${s.notes}</div>`:''}
+    </div>`).join('');
+}
+
+// ── Career Roadmap ────────────────────────────────────
+let editRoadmapId = null;
+let dragSrcId = null;
+
+const RS_COLORS = { skill:'rgba(168,85,247,.1)', apply:'rgba(59,130,246,.1)', network:'rgba(16,185,129,.1)', study:'rgba(245,158,11,.1)', milestone:'rgba(236,72,153,.1)' };
+const RS_BORDER = { skill:'#a855f7', apply:'#3b82f6', network:'#10b981', study:'#f59e0b', milestone:'#ec4899' };
+const RS_LABELS = { skill:'Skill / Cert', apply:'Application', network:'Networking', study:'Study', milestone:'Milestone' };
+const RS_STATUS = { todo:'To Do', inprogress:'In Progress', done:'Done ✓' };
+const RS_STATUS_CLR = { todo:'#9ca3af', inprogress:'#f59e0b', done:'#10b981' };
+
+function renderRoadmap() {
+  const wrap = el('roadmap-board'); if(!wrap) return;
+  if(!roadmap.length) {
+    wrap.innerHTML = `<div class="empty">No steps yet — add your first career step to start planning</div>`;
+    return;
+  }
+  const sorted = [...roadmap].sort((a,b) => (a.order||0)-(b.order||0));
+  wrap.innerHTML = `<div style="font-size:11px;color:var(--t3);margin-bottom:10px">Drag steps to reorder your roadmap</div>` +
+    sorted.map(s => `
+    <div class="roadmap-step" draggable="true" data-id="${s.id}"
+      style="display:flex;align-items:flex-start;gap:12px;padding:1rem;background:${RS_COLORS[s.cat]||'rgba(168,85,247,.08)'};border:1.5px solid ${RS_BORDER[s.cat]||'#a855f7'};border-radius:14px;margin-bottom:10px;cursor:grab;transition:opacity .15s">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
+        <div style="width:24px;height:24px;border-radius:50%;background:${RS_BORDER[s.cat]||'#a855f7'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700">${sorted.indexOf(s)+1}</div>
+        <div style="font-size:9px;color:var(--t3);writing-mode:vertical-lr;transform:rotate(180deg);letter-spacing:.05em">drag</div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+          <span style="font-size:14px;font-weight:700;color:var(--t)">${s.title}</span>
+          <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:${RS_BORDER[s.cat]||'#a855f7'}20;color:${RS_BORDER[s.cat]||'#a855f7'}">${RS_LABELS[s.cat]||s.cat}</span>
+          <span style="font-size:10px;font-weight:600;color:${RS_STATUS_CLR[s.status]||'#9ca3af'}">${RS_STATUS[s.status]||s.status}</span>
+        </div>
+        ${s.date?`<div style="font-size:11px;color:var(--t3)">Target: ${fD(s.date)}</div>`:''}
+        ${s.notes?`<div style="font-size:12px;color:var(--t2);margin-top:5px;line-height:1.5">${s.notes}</div>`:''}
+      </div>
+      <div style="display:flex;gap:5px;flex-shrink:0">
+        <button class="btn btn-g btn-sm" onclick="editRoadmapStep(${s.id})">Edit</button>
+        <button class="btn btn-d btn-sm" onclick="dRoadmapStep(${s.id})">x</button>
+      </div>
+    </div>`).join('');
+
+  // Wire drag events
+  wrap.querySelectorAll('.roadmap-step').forEach(card => {
+    card.addEventListener('dragstart', e => { dragSrcId = +card.dataset.id; card.style.opacity='.4'; });
+    card.addEventListener('dragend',   e => { card.style.opacity='1'; });
+    card.addEventListener('dragover',  e => { e.preventDefault(); card.style.borderStyle='dashed'; });
+    card.addEventListener('dragleave', e => { card.style.borderStyle='solid'; });
+    card.addEventListener('drop', async e => {
+      e.preventDefault(); card.style.borderStyle='solid';
+      const targetId = +card.dataset.id;
+      if(dragSrcId===targetId) return;
+      const src = roadmap.find(x=>x.id===dragSrcId);
+      const tgt = roadmap.find(x=>x.id===targetId);
+      if(!src||!tgt) return;
+      const srcOrder = src.order||0, tgtOrder = tgt.order||0;
+      src.order = tgtOrder; tgt.order = srcOrder;
+      await save(); renderRoadmap();
+    });
+  });
+}
+
+// ── Company Watchlist ─────────────────────────────────
+let editWatchId = null;
+let watchLocF = 'all';
+
+function renderWatchlist() {
+  const wrap = el('watchlist'); if(!wrap) return;
+  let items = watchLocF==='all' ? watchlist : watchlist.filter(w=>w.loc===watchLocF||w.loc==='both');
+  if(!items.length) {
+    wrap.innerHTML = '<div class="empty">No companies yet — add companies you want to keep an eye on</div>'; return;
+  }
+  const locBadge = loc => loc==='sgp'
+    ? `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(16,185,129,.12);color:#065f46">Singapore</span>`
+    : loc==='both'
+    ? `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(59,130,246,.1);color:#1e3a8a">BKK + SGP</span>`
+    : `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(245,158,11,.12);color:#92400e">Bangkok</span>`;
+  wrap.innerHTML = items.map(w => `
+    <div class="glass" style="padding:1rem;margin-bottom:.65rem">
+      <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px">
+            <span style="font-size:15px;font-weight:700;color:var(--t)">${w.name}</span>
+            ${locBadge(w.loc)}
+            ${w.type?`<span style="font-size:11px;color:var(--t3)">${w.type}</span>`:''}
+          </div>
+          ${w.roles?`<div style="font-size:12px;color:var(--t2);margin-bottom:4px"><span style="font-weight:600;color:var(--t)">Roles: </span>${w.roles}</div>`:''}
+          ${w.notes?`<div style="font-size:12px;color:var(--t2);font-style:italic">${w.notes}</div>`:''}
+          ${w.url?`<a href="${w.url}" target="_blank" style="font-size:11px;color:#a855f7;display:inline-block;margin-top:4px">Careers page →</a>`:''}
+        </div>
+        <div style="display:flex;gap:5px;flex-shrink:0">
+          <button class="btn btn-g btn-sm" onclick="editWatch(${w.id})">Edit</button>
+          <button class="btn btn-d btn-sm" onclick="dWatch(${w.id})">x</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── Masters / MBA ─────────────────────────────────────
+let editMastersId = null;
+
+function renderMasters() {
+  const wrap = el('masters-list'); if(!wrap) return;
+  if(!masters.length) {
+    wrap.innerHTML = '<div class="empty">No programs yet — start adding programs you\'re considering</div>'; return;
+  }
+  const today = new Date();
+  wrap.innerHTML = [...masters].sort((a,b)=>(a.deadline||'9999').localeCompare(b.deadline||'9999')).map(m => {
+    const daysLeft = m.deadline ? Math.ceil((new Date(m.deadline)-today)/(1000*60*60*24)) : null;
+    const urgency = daysLeft===null ? '' : daysLeft < 0 ? `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(244,63,94,.1);color:#be123c">Deadline passed</span>`
+      : daysLeft < 30 ? `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(245,158,11,.15);color:#92400e">${daysLeft} days left!</span>`
+      : `<span style="font-size:10px;color:var(--t3)">${daysLeft} days left</span>`;
+    return `<div class="glass" style="padding:1rem;margin-bottom:.65rem${daysLeft!==null&&daysLeft<30?';border-left:3px solid #f59e0b':''}">
+      <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+            <span style="font-size:14px;font-weight:700;color:var(--t)">${m.program}</span>
+            ${urgency}
+          </div>
+          <div style="font-size:13px;font-weight:600;color:#a855f7;margin-bottom:4px">${m.uni}${m.loc?` · ${m.loc}`:''}</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--t2);margin-bottom:5px">
+            ${m.deadline?`<span>📅 Deadline: <strong>${fD(m.deadline)}</strong></span>`:''}
+            ${m.duration?`<span>⏱ ${m.duration}</span>`:''}
+            ${m.cost?`<span>💰 ${m.cost}</span>`:''}
+          </div>
+          ${m.notes?`<div style="font-size:12px;color:var(--t2);font-style:italic;line-height:1.5">${m.notes}</div>`:''}
+          ${m.url?`<a href="${m.url}" target="_blank" style="font-size:11px;color:#a855f7;display:inline-block;margin-top:4px">Program page →</a>`:''}
+        </div>
+        <div style="display:flex;gap:5px;flex-shrink:0">
+          <button class="btn btn-g btn-sm" onclick="editMasters(${m.id})">Edit</button>
+          <button class="btn btn-d btn-sm" onclick="dMasters(${m.id})">x</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── DOMContentLoaded listeners ────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+
+  // CV Sections
+  el('btn-cv-add')?.addEventListener('click', () => {
+    editCvId = null; el('m-cv-title').textContent='Add CV Section';
+    ['cv-sec-name','cv-sec-content','cv-sec-notes'].forEach(id=>sv(id,''));
+    el('cv-sec-date').value = new Date().toISOString().split('T')[0];
+    openM('m-cv-section');
+  });
+  el('sv-cv-section')?.addEventListener('click', async () => {
+    const name = v('cv-sec-name'); if(!name) return;
+    const entry = { id:editCvId||Date.now(), name, content:v('cv-sec-content'), notes:v('cv-sec-notes'), date:v('cv-sec-date') };
+    if(editCvId){ const i=cvSections.findIndex(x=>x.id===editCvId); cvSections[i]=entry; editCvId=null; }
+    else cvSections.push(entry);
+    await save(); renderCvSections(); closeM('m-cv-section');
+  });
+  window.editCvSection = id => {
+    editCvId=id; const s=cvSections.find(x=>x.id===id); if(!s) return;
+    el('m-cv-title').textContent='Edit CV Section';
+    sv('cv-sec-name',s.name); sv('cv-sec-content',s.content||''); sv('cv-sec-notes',s.notes||'');
+    el('cv-sec-date').value=s.date||''; openM('m-cv-section');
+  };
+  window.dCvSection = async id => { cvSections=cvSections.filter(x=>x.id!==id); await save(); renderCvSections(); };
+
+  // Roadmap
+  el('btn-roadmap-add')?.addEventListener('click', () => {
+    editRoadmapId=null; el('m-roadmap-title').textContent='Add Step';
+    ['rs-title','rs-notes'].forEach(id=>sv(id,''));
+    el('rs-date').value=''; el('rs-cat').value='skill'; el('rs-status').value='todo';
+    openM('m-roadmap-step');
+  });
+  el('sv-roadmap-step')?.addEventListener('click', async () => {
+    const title=v('rs-title'); if(!title) return;
+    const maxOrder = roadmap.length ? Math.max(...roadmap.map(x=>x.order||0)) : 0;
+    const entry = { id:editRoadmapId||Date.now(), title, cat:el('rs-cat').value, status:el('rs-status').value, date:v('rs-date'), notes:v('rs-notes'), order:editRoadmapId ? (roadmap.find(x=>x.id===editRoadmapId)?.order||0) : maxOrder+1 };
+    if(editRoadmapId){ const i=roadmap.findIndex(x=>x.id===editRoadmapId); roadmap[i]=entry; editRoadmapId=null; }
+    else roadmap.push(entry);
+    await save(); renderRoadmap(); closeM('m-roadmap-step');
+  });
+  window.editRoadmapStep = id => {
+    editRoadmapId=id; const s=roadmap.find(x=>x.id===id); if(!s) return;
+    el('m-roadmap-title').textContent='Edit Step';
+    sv('rs-title',s.title); sv('rs-notes',s.notes||'');
+    el('rs-date').value=s.date||''; el('rs-cat').value=s.cat||'skill'; el('rs-status').value=s.status||'todo';
+    openM('m-roadmap-step');
+  };
+  window.dRoadmapStep = async id => { roadmap=roadmap.filter(x=>x.id!==id); await save(); renderRoadmap(); };
+
+  // Company Watchlist
+  el('btn-watch-add')?.addEventListener('click', () => {
+    editWatchId=null; el('m-watch-title').textContent='Add Company';
+    ['wc-name','wc-type','wc-roles','wc-url','wc-notes'].forEach(id=>sv(id,''));
+    el('wc-loc').value='bkk'; openM('m-watch');
+  });
+  el('sv-watch')?.addEventListener('click', async () => {
+    const name=v('wc-name'); if(!name) return;
+    const entry={id:editWatchId||Date.now(),name,loc:el('wc-loc').value,type:v('wc-type'),roles:v('wc-roles'),url:v('wc-url'),notes:v('wc-notes')};
+    if(editWatchId){ const i=watchlist.findIndex(x=>x.id===editWatchId); watchlist[i]=entry; editWatchId=null; }
+    else watchlist.push(entry);
+    await save(); renderWatchlist(); closeM('m-watch');
+  });
+  window.editWatch = id => {
+    editWatchId=id; const w=watchlist.find(x=>x.id===id); if(!w) return;
+    el('m-watch-title').textContent='Edit Company';
+    sv('wc-name',w.name); sv('wc-type',w.type||''); sv('wc-roles',w.roles||''); sv('wc-url',w.url||''); sv('wc-notes',w.notes||'');
+    el('wc-loc').value=w.loc||'bkk'; openM('m-watch');
+  };
+  window.dWatch = async id => { watchlist=watchlist.filter(x=>x.id!==id); await save(); renderWatchlist(); };
+  el('watch-loc-bar')?.addEventListener('click', e => {
+    const fc=e.target.closest('.fc'); if(!fc) return;
+    document.querySelectorAll('#watch-loc-bar .fc').forEach(x=>x.classList.remove('active')); fc.classList.add('active');
+    watchLocF=fc.dataset.wl; renderWatchlist();
+  });
+
+  // Masters
+  el('btn-masters-add')?.addEventListener('click', () => {
+    editMastersId=null; el('m-masters-title').textContent='Add Program';
+    ['ms-prog','ms-uni','ms-loc','ms-dur','ms-cost','ms-url','ms-notes'].forEach(id=>sv(id,''));
+    el('ms-deadline').value=''; openM('m-masters');
+  });
+  el('sv-masters')?.addEventListener('click', async () => {
+    const program=v('ms-prog'); if(!program) return;
+    const entry={id:editMastersId||Date.now(),program,uni:v('ms-uni'),loc:v('ms-loc'),dur:v('ms-dur'),cost:v('ms-cost'),deadline:v('ms-deadline'),url:v('ms-url'),notes:v('ms-notes')};
+    if(editMastersId){ const i=masters.findIndex(x=>x.id===editMastersId); masters[i]=entry; editMastersId=null; }
+    else masters.push(entry);
+    await save(); renderMasters(); closeM('m-masters');
+  });
+  window.editMasters = id => {
+    editMastersId=id; const m=masters.find(x=>x.id===id); if(!m) return;
+    el('m-masters-title').textContent='Edit Program';
+    sv('ms-prog',m.program); sv('ms-uni',m.uni||''); sv('ms-loc',m.loc||''); sv('ms-dur',m.dur||'');
+    sv('ms-cost',m.cost||''); sv('ms-url',m.url||''); sv('ms-notes',m.notes||'');
+    el('ms-deadline').value=m.deadline||''; openM('m-masters');
+  };
+  window.dMasters = async id => { masters=masters.filter(x=>x.id!==id); await save(); renderMasters(); };
+
+  // Render all career pages on load
+  renderCvSections(); renderRoadmap(); renderWatchlist(); renderMasters();
+});
+
+// ══════════════════════════════════════════════════════
+// TO-DO LIST
+// ══════════════════════════════════════════════════════
+let editTodoId = null;
+let todoFilter = 'all';
+
+const TODO_CAT_CLR = { today:'#a855f7', work:'#3b82f6', personal:'#10b981', errand:'#f59e0b' };
+const TODO_CAT_LBL = { today:'Today', work:'Work', personal:'Personal', errand:'Errand' };
+
+function renderTodos() {
+  const wrap = el('todo-list'); if(!wrap) return;
+  let items = todoFilter==='done'
+    ? todos.filter(t=>t.done)
+    : todoFilter==='all'
+    ? todos.filter(t=>!t.done)
+    : todos.filter(t=>!t.done && t.cat===todoFilter);
+
+  // Sort: overdue first, then by due date, then undated
+  const today = new Date().toISOString().split('T')[0];
+  items = [...items].sort((a,b) => {
+    if(a.done !== b.done) return a.done ? 1 : -1;
+    if(!a.date && !b.date) return 0;
+    if(!a.date) return 1;
+    if(!b.date) return -1;
+    return a.date.localeCompare(b.date);
+  });
+
+  // Update count badge
+  const undone = todos.filter(t=>!t.done).length;
+  const cntEl = el('cnt-todos');
+  if(cntEl) cntEl.textContent = undone;
+
+  if(!items.length) {
+    wrap.innerHTML = todoFilter==='done'
+      ? '<div class="empty">No completed tasks yet</div>'
+      : '<div class="empty">Nothing here — enjoy the empty list 🌿</div>';
+    return;
+  }
+
+  wrap.innerHTML = items.map(t => {
+    const overdue = !t.done && t.date && t.date < today;
+    const clr = TODO_CAT_CLR[t.cat] || '#a855f7';
+    const dateLabel = t.date
+      ? overdue
+        ? `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(244,63,94,.1);color:#be123c">Overdue · ${fD(t.date)}</span>`
+        : t.date===today
+        ? `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(168,85,247,.1);color:#7c3aed">Due today</span>`
+        : `<span style="font-size:10px;color:var(--t3)">Due ${fD(t.date)}</span>`
+      : '';
+
+    return `<div class="glass" style="display:flex;align-items:flex-start;gap:12px;padding:.85rem 1rem;margin-bottom:.5rem;${t.done?'opacity:.5':''}${overdue?';border-left:3px solid #f43f5e':''}">
+      <div onclick="toggleTodo(${t.id})" style="width:20px;height:20px;border-radius:6px;border:2px solid ${t.done?'#10b981':clr};background:${t.done?'#10b981':'transparent'};cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .15s">
+        ${t.done?'<div style="color:#fff;font-size:12px;font-weight:700">✓</div>':''}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--t);${t.done?'text-decoration:line-through;color:var(--t3)':''};line-height:1.4">${t.text}</div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:4px;flex-wrap:wrap">
+          <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:${clr}18;color:${clr}">${TODO_CAT_LBL[t.cat]||t.cat}</span>
+          ${dateLabel}
+          ${t.notes?`<span style="font-size:11px;color:var(--t3);font-style:italic">${t.notes}</span>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        ${!t.done?`<button class="btn btn-g btn-sm" onclick="editTodo(${t.id})">Edit</button>`:''}
+        <button class="btn btn-d btn-sm" onclick="dTodo(${t.id})">x</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  el('btn-todo-add')?.addEventListener('click', () => {
+    editTodoId = null;
+    el('m-todo-title').textContent = 'Add Task';
+    sv('td-text',''); sv('td-notes','');
+    el('td-cat').value = 'today';
+    el('td-date').value = new Date().toISOString().split('T')[0];
+    openM('m-todo');
+  });
+
+  el('sv-todo')?.addEventListener('click', async () => {
+    const text = v('td-text'); if(!text) return;
+    const entry = { id:editTodoId||Date.now(), text, cat:el('td-cat').value, date:v('td-date'), notes:v('td-notes'), done:false };
+    if(editTodoId) {
+      const i = todos.findIndex(x=>x.id===editTodoId);
+      todos[i] = { ...todos[i], ...entry, done:todos[i].done };
+      editTodoId = null;
+    } else {
+      todos.push(entry);
+    }
+    await save(); renderTodos(); closeM('m-todo');
+  });
+
+  window.editTodo = id => {
+    editTodoId = id;
+    const t = todos.find(x=>x.id===id); if(!t) return;
+    el('m-todo-title').textContent = 'Edit Task';
+    sv('td-text',t.text); sv('td-notes',t.notes||'');
+    el('td-cat').value = t.cat||'today';
+    el('td-date').value = t.date||'';
+    openM('m-todo');
+  };
+
+  window.toggleTodo = async id => {
+    const t = todos.find(x=>x.id===id); if(!t) return;
+    t.done = !t.done;
+    await save(); renderTodos();
+  };
+
+  window.dTodo = async id => {
+    todos = todos.filter(x=>x.id!==id);
+    await save(); renderTodos();
+  };
+
+  el('todo-filter-bar')?.addEventListener('click', e => {
+    const fc = e.target.closest('.fc'); if(!fc) return;
+    document.querySelectorAll('#todo-filter-bar .fc').forEach(x=>x.classList.remove('active'));
+    fc.classList.add('active');
+    todoFilter = fc.dataset.tf;
+    renderTodos();
+  });
+
+  renderTodos();
+});
