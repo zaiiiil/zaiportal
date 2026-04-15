@@ -31,6 +31,7 @@
   <button class="tab active" data-t="habits">Goals & Habits</button>
   <button class="tab" data-t="workout">Workouts <span class="tcnt" id="cnt-wk">0</span></button>
   <button class="tab" data-t="calendar">Calendar</button>
+  <button class="tab" data-t="todos">To-Do <span class="tcnt" id="cnt-todos">0</span></button>
 </nav>
 
 <div class="panels" data-section="s1">
@@ -99,6 +100,23 @@
       </div>
     </div>
 
+    <!-- TO-DO LIST -->
+    <div class="panel" id="p-todos">
+      <div class="ph">
+        <div><div class="ptitle">To-Do List</div><div class="psub">Tasks, errands, reminders</div></div>
+        <button class="btn btn-p" id="btn-todo-add">+ Add Task</button>
+      </div>
+      <div class="fbar" id="todo-filter-bar">
+        <button class="fc active" data-tf="all">All</button>
+        <button class="fc" data-tf="today">Today</button>
+        <button class="fc" data-tf="work">Work</button>
+        <button class="fc" data-tf="personal">Personal</button>
+        <button class="fc" data-tf="errand">Errand</button>
+        <button class="fc" data-tf="done">Completed</button>
+      </div>
+      <div id="todo-list"></div>
+    </div>
+
   </div>
 </div>
 
@@ -109,7 +127,6 @@
   <button class="tab" data-t="media">Saved Media <span class="tcnt" id="cnt-med">0</span></button>
   <button class="tab" data-t="courses">Courses <span class="tcnt" id="cnt-crs">0</span></button>
   <button class="tab" data-t="conferences">Conferences <span class="tcnt" id="cnt-conf">0</span></button>
-  <button class="tab" data-t="apps">Applications <span class="tcnt" id="cnt-apps">0</span></button>
 </nav>
 
 <div class="panels" data-section="s2">
@@ -258,7 +275,25 @@
     </div>
 
     <!-- APPLICATIONS -->
-    <div class="panel" id="p-apps">
+  </div>
+</div>
+
+
+<!-- ══════════════ SECTION 3 — CAREER ══════════════ -->
+<div class="sec-label" style="top:58px">✦ Career</div>
+<nav class="tabs" data-section="s3" style="top:88px">
+  <button class="tab active" data-t="career-apps">Applications <span class="tcnt" id="cnt-apps">0</span></button>
+  <button class="tab" data-t="career-cv">CV & Profile</button>
+  <button class="tab" data-t="career-plan">Career Roadmap</button>
+  <button class="tab" data-t="career-watch">Company Watchlist</button>
+  <button class="tab" data-t="career-masters">Masters / MBA</button>
+</nav>
+
+<div class="panels" data-section="s3">
+  <div class="main-wrap">
+
+    <!-- APPLICATIONS -->
+    <div class="panel active" id="p-career-apps">
       <div class="ph">
         <div><div class="ptitle">Application Tracker</div><div class="psub">Bangkok & Singapore pipeline</div></div>
         <button class="btn btn-p" id="btn-app">+ Log Application</button>
@@ -280,7 +315,131 @@
       <div id="app-list"></div>
     </div>
 
+    <!-- CV & PROFILE -->
+    <div class="panel" id="p-career-cv">
+      <div class="ph">
+        <div><div class="ptitle">CV & Profile Content</div><div class="psub">Store your profile descriptions, headlines, and CV content</div></div>
+        <button class="btn btn-p" id="btn-cv-add">+ Add Section</button>
+      </div>
+      <div id="cv-sections-list"></div>
+    </div>
+
+    <!-- CAREER ROADMAP -->
+    <div class="panel" id="p-career-plan">
+      <div class="ph">
+        <div><div class="ptitle">Career Roadmap</div><div class="psub">Drag & drop steps to plan your path</div></div>
+        <button class="btn btn-p" id="btn-roadmap-add">+ Add Step</button>
+      </div>
+      <div id="roadmap-board"></div>
+    </div>
+
+    <!-- COMPANY WATCHLIST -->
+    <div class="panel" id="p-career-watch">
+      <div class="ph">
+        <div><div class="ptitle">Company Watchlist</div><div class="psub">Companies to keep an eye on in Bangkok & Singapore</div></div>
+        <button class="btn btn-p" id="btn-watch-add">+ Add Company</button>
+      </div>
+      <div class="fbar" id="watch-loc-bar">
+        <button class="fc active" data-wl="all">All</button>
+        <button class="fc" data-wl="bkk" style="color:#92400e">Bangkok</button>
+        <button class="fc" data-wl="sgp" style="color:#065f46">Singapore</button>
+      </div>
+      <div id="watchlist"></div>
+    </div>
+
+    <!-- MASTERS / MBA -->
+    <div class="panel" id="p-career-masters">
+      <div class="ph">
+        <div><div class="ptitle">Masters & MBA Programs</div><div class="psub">Programs you're considering · deadlines · notes</div></div>
+        <button class="btn btn-p" id="btn-masters-add">+ Add Program</button>
+      </div>
+      <div id="masters-list"></div>
+    </div>
+
   </div>
+</div>
+
+<!-- CV Section modal -->
+<div class="modal" id="m-cv-section">
+  <div class="mhdr"><h3 id="m-cv-title">Add CV Section</h3><button class="mx" data-close="m-cv-section">×</button></div>
+  <div class="mbody">
+    <div class="fld"><label>Section Name</label><input id="cv-sec-name" placeholder="e.g. LinkedIn Headline, Profile Summary, Job Title"></div>
+    <div class="fld"><label>Content</label><textarea id="cv-sec-content" style="min-height:120px" placeholder="Paste your current content here..."></textarea></div>
+    <div class="fld"><label>Notes / What to improve</label><textarea id="cv-sec-notes" style="min-height:80px" placeholder="Ideas, feedback, things to update..."></textarea></div>
+    <div class="fld"><label>Last Updated</label><input id="cv-sec-date" type="date"></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-cv-section">Cancel</button><button class="btn btn-p" id="sv-cv-section">Save</button></div>
+</div>
+
+<!-- Roadmap Step modal -->
+<div class="modal" id="m-roadmap-step">
+  <div class="mhdr"><h3 id="m-roadmap-title">Add Step</h3><button class="mx" data-close="m-roadmap-step">×</button></div>
+  <div class="mbody">
+    <div class="fld"><label>Step Title</label><input id="rs-title" placeholder="e.g. Get GCP certified, Apply to 5 CROs"></div>
+    <div class="fld"><label>Category</label>
+      <select id="rs-cat">
+        <option value="skill">Skill / Certification</option>
+        <option value="apply">Job Application</option>
+        <option value="network">Networking</option>
+        <option value="study">Study / Research</option>
+        <option value="milestone">Milestone</option>
+      </select>
+    </div>
+    <div class="r2">
+      <div class="fld"><label>Target Date</label><input id="rs-date" type="date"></div>
+      <div class="fld"><label>Status</label>
+        <select id="rs-status">
+          <option value="todo">To Do</option>
+          <option value="inprogress">In Progress</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+    </div>
+    <div class="fld"><label>Notes</label><textarea id="rs-notes" placeholder="Details, resources, action items..."></textarea></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-roadmap-step">Cancel</button><button class="btn btn-p" id="sv-roadmap-step">Save</button></div>
+</div>
+
+<!-- Company Watchlist modal -->
+<div class="modal" id="m-watch">
+  <div class="mhdr"><h3 id="m-watch-title">Add Company</h3><button class="mx" data-close="m-watch">×</button></div>
+  <div class="mbody">
+    <div class="r2">
+      <div class="fld"><label>Company Name</label><input id="wc-name" placeholder="e.g. ICON plc"></div>
+      <div class="fld"><label>Location</label>
+        <select id="wc-loc">
+          <option value="bkk">Bangkok</option>
+          <option value="sgp">Singapore</option>
+          <option value="both">Both</option>
+        </select>
+      </div>
+    </div>
+    <div class="fld"><label>Type / Industry</label><input id="wc-type" placeholder="e.g. CRO, Pharma MNC, Biotech"></div>
+    <div class="fld"><label>Roles to look out for</label><textarea id="wc-roles" placeholder="e.g. CRA, Site Management Associate, Clinical Data Coordinator"></textarea></div>
+    <div class="fld"><label>Website / Careers Page</label><input id="wc-url" type="url" placeholder="https://..."></div>
+    <div class="fld"><label>Notes</label><textarea id="wc-notes" placeholder="Contacts, insights, why you like this company..."></textarea></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-watch">Cancel</button><button class="btn btn-p" id="sv-watch">Save</button></div>
+</div>
+
+<!-- Masters / MBA modal -->
+<div class="modal" id="m-masters">
+  <div class="mhdr"><h3 id="m-masters-title">Add Program</h3><button class="mx" data-close="m-masters">×</button></div>
+  <div class="mbody">
+    <div class="fld"><label>Program Name</label><input id="ms-prog" placeholder="e.g. MSc Clinical Research, MBA Healthcare"></div>
+    <div class="fld"><label>University</label><input id="ms-uni" placeholder="e.g. Mahidol, NUS, INSEAD"></div>
+    <div class="r2">
+      <div class="fld"><label>Country / Location</label><input id="ms-loc" placeholder="e.g. Thailand, Singapore, France"></div>
+      <div class="fld"><label>Duration</label><input id="ms-dur" placeholder="e.g. 2 years, 18 months"></div>
+    </div>
+    <div class="r2">
+      <div class="fld"><label>Application Deadline</label><input id="ms-deadline" type="date"></div>
+      <div class="fld"><label>Tuition / Cost</label><input id="ms-cost" placeholder="e.g. ฿500,000 / year"></div>
+    </div>
+    <div class="fld"><label>Program URL</label><input id="ms-url" type="url" placeholder="https://..."></div>
+    <div class="fld"><label>Notes / Why interested</label><textarea id="ms-notes" placeholder="Why this program, pros/cons, requirements to meet..."></textarea></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-masters">Cancel</button><button class="btn btn-p" id="sv-masters">Save</button></div>
 </div>
 
 <!-- ══════════════ MODALS ══════════════ -->
@@ -527,6 +686,27 @@
     <div id="crs-notes-modules"></div>
     <button onclick="addModule()" style="width:100%;padding:12px;border:2px dashed #e9d5ff;border-radius:12px;background:transparent;font-size:13px;font-weight:600;color:#a855f7;cursor:pointer;margin-top:.5rem">+ Add Module</button>
   </div>
+</div>
+
+<!-- To-Do modal -->
+<div class="modal" id="m-todo">
+  <div class="mhdr"><h3 id="m-todo-title">Add Task</h3><button class="mx" data-close="m-todo">×</button></div>
+  <div class="mbody">
+    <div class="fld"><label>Task</label><input id="td-text" placeholder="What needs to be done?"></div>
+    <div class="r2">
+      <div class="fld"><label>Category</label>
+        <select id="td-cat">
+          <option value="today">Today</option>
+          <option value="work">Work</option>
+          <option value="personal">Personal</option>
+          <option value="errand">Errand</option>
+        </select>
+      </div>
+      <div class="fld"><label>Due Date</label><input id="td-date" type="date"></div>
+    </div>
+    <div class="fld"><label>Notes</label><input id="td-notes" placeholder="Optional details..."></div>
+  </div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-todo">Cancel</button><button class="btn btn-p" id="sv-todo">Save</button></div>
 </div>
 
 <script type="module" src="app.js"></script>
