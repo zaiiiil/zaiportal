@@ -26,17 +26,22 @@ async function loadFromFirebase() {
     const snap = await getDoc(doc(db, "portals", DOC_ID));
     if (snap.exists()) {
       const d = snap.data();
-      habits   = d.habits   || [];
-      goals    = d.goals    || [];
-      workouts = d.workouts || [];
-      hlog     = d.hlog     || {};
-      arts     = d.arts     || [];
-      meds     = d.meds     || [];
-      courses  = d.courses  || [];
-      confs    = d.confs    || [];
-      apps, todos, cvSections, roadmap, watchlist, masters     = d.apps     || [];
-      calEvs   = d.calEvs   || [];
-      wkGoal   = d.wkGoal   || 4;
+      habits      = d.habits      || [];
+      goals       = d.goals       || [];
+      workouts    = d.workouts    || [];
+      hlog        = d.hlog        || {};
+      arts        = d.arts        || [];
+      meds        = d.meds        || [];
+      courses     = d.courses     || [];
+      confs       = d.confs       || [];
+      apps        = d.apps        || [];
+      todos       = d.todos       || [];
+      cvSections  = d.cvSections  || [];
+      roadmap     = d.roadmap     || [];
+      watchlist   = d.watchlist   || [];
+      masters     = d.masters     || [];
+      calEvs      = d.calEvs      || [];
+      wkGoal      = d.wkGoal      || 4;
     } else {
       await migrateFromLocalStorage();
     }
@@ -69,7 +74,8 @@ async function saveToFirebase() {
   try {
     await setDoc(doc(db, "portals", DOC_ID), {
       habits, goals, workouts, hlog, arts,
-      meds, courses, confs, apps, calEvs, wkGoal
+      meds, courses, confs, apps, calEvs, wkGoal,
+      todos, cvSections, roadmap, watchlist, masters
     });
   } catch(e) {
     console.warn("Firebase save failed:", e);
