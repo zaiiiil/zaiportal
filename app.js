@@ -168,6 +168,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderHabits(); renderGoals(); renderWorkouts();
   renderCalendar(); selectDay(TODAY);
   renderArts(); renderMeds(); renderCourses(); renderConfs(); renderApps();
+  renderTodos(); renderCvSections(); renderRoadmap(); renderWatchlist(); renderMasters();
   updCounts(); updStreak();
 
   // Habits
@@ -367,6 +368,14 @@ function initTabs() {
     document.querySelectorAll(`.tabs[data-section="${section}"] .tab`).forEach(x => x.classList.remove('active'));
     document.querySelectorAll(`.panels[data-section="${section}"] .panel`).forEach(x => x.classList.remove('active'));
     b.classList.add('active'); el('p-' + b.dataset.t)?.classList.add('active');
+    // Re-render on tab click to ensure data shows
+    const t = b.dataset.t;
+    if(t==='career-apps') { renderApps(); updCounts(); }
+    if(t==='career-cv') renderCvSections();
+    if(t==='career-plan') renderRoadmap();
+    if(t==='career-watch') renderWatchlist();
+    if(t==='career-masters') renderMasters();
+    if(t==='todos') renderTodos();
   }));
 }
 function initModals() {
