@@ -23,38 +23,171 @@
   </div>
 </header>
 
-<!-- ── PANELS ── -->
-<div class="mob-panels">
-
-  <!-- HOME: stats + this week -->
-  <div class="mob-panel active" id="mp-home">
-    <div class="mob-content">
-      <div class="stats-row" id="wk-stats"></div>
-      <div class="divl"><span>This Week</span></div>
-      <div class="wk-week" id="wk-week"></div>
-      <div class="divl"><span>Week by Week</span></div>
-      <div class="glass" style="padding:1.2rem;margin-bottom:1rem" id="wk-chart"></div>
+<!-- ══════════════════════════════════════════════════════
+     GHOST ELEMENTS — invisible, never shown, but required
+     by app.js so it doesn't crash on getElementById calls
+     ══════════════════════════════════════════════════════ -->
+<div style="display:none" aria-hidden="true">
+  <!-- tab scaffolding app.js queries -->
+  <nav class="tabs" data-section="s1">
+    <button class="tab active" data-t="workout">Workouts</button>
+  </nav>
+  <div class="panels" data-section="s1">
+    <div class="main-wrap">
+      <div class="panel active" id="p-workout"></div>
+      <div class="panel" id="p-habits"></div>
+      <div class="panel" id="p-calendar"></div>
+      <div class="panel" id="p-todos"></div>
+      <div class="panel" id="p-news"></div>
+      <div class="panel" id="p-media"></div>
+      <div class="panel" id="p-courses"></div>
+      <div class="panel" id="p-conferences"></div>
+      <div class="panel" id="p-career-apps"></div>
+      <div class="panel" id="p-career-cv"></div>
+      <div class="panel" id="p-career-plan"></div>
+      <div class="panel" id="p-career-watch"></div>
+      <div class="panel" id="p-career-masters"></div>
     </div>
   </div>
 
-  <!-- LOG: quick-log form always visible -->
+  <!-- Workout buttons app.js binds to -->
+  <button id="btn-wk-goal"></button>
+  <button id="btn-wk"></button>
+  <button id="sv-wk-goal"></button>
+  <input id="wk-goal-val" type="number">
+
+  <!-- Workout modal fields app.js reads from -->
+  <select id="wk-tp"></select>
+  <input id="wk-dt" type="date">
+  <input id="wk-dur" type="number">
+  <input id="wk-cal" type="number">
+  <input id="wk-dis" type="number">
+
+  <!-- Render targets app.js writes into -->
+  <div id="wk-stats"></div>
+  <div id="wk-week"></div>
+  <div id="wk-chart"></div>
+  <div id="wk-list"></div>
+  <span id="cnt-wk"></span>
+
+  <!-- All the other sections app.js tries to render (safely ignored) -->
+  <div id="habit-list"></div>
+  <div id="goal-list"></div>
+  <div id="saved-arts"></div>
+  <div id="med-list"></div>
+  <div id="crs-following"></div>
+  <div id="crs-interested"></div>
+  <div id="conf-list"></div>
+  <div id="app-list"></div>
+  <div id="app-stats"></div>
+  <div id="cv-sections-list"></div>
+  <div id="roadmap-board"></div>
+  <div id="watchlist"></div>
+  <div id="masters-list"></div>
+  <div id="todo-list"></div>
+  <div id="cal-grid"></div>
+  <div id="day-detail"></div>
+  <div id="dd-events"></div>
+  <span id="dd-title"></span>
+  <span id="week-label"></span>
+  <span id="cnt-todos"></span>
+  <span id="cnt-med"></span>
+  <span id="cnt-crs"></span>
+  <span id="cnt-conf"></span>
+  <span id="cnt-apps"></span>
+
+  <!-- Buttons app.js binds events to -->
+  <button id="btn-habit"></button>
+  <button id="sv-habit"></button>
+  <input id="hb-n"><input id="hb-e">
+  <button id="btn-goal"></button>
+  <button id="sv-goal"></button>
+  <input id="gl-t"><select id="gl-c"></select><input id="gl-d"><input id="gl-p"><textarea id="gl-n"></textarea>
+  <button id="btn-cal-today"></button>
+  <button id="btn-cal-add"></button>
+  <button id="prev-wk"></button>
+  <button id="next-wk"></button>
+  <button id="sv-ev"></button>
+  <input id="ev-name"><input id="ev-date" type="date"><input id="ev-time" type="time"><select id="ev-dur"></select>
+  <button id="btn-art"></button>
+  <button id="sv-art"></button>
+  <input id="a-ti"><input id="a-ur"><input id="a-sr"><textarea id="a-no"></textarea><div id="a-tg"></div>
+  <button id="btn-med"></button>
+  <button id="sv-med"></button>
+  <input id="md-ti"><input id="md-ur"><input id="md-cr"><textarea id="md-no"></textarea><select id="md-tp"></select><div id="md-tg"></div>
+  <div id="med-type-bar"></div>
+  <div id="med-tag-bar"></div>
+  <button id="btn-add-following"></button>
+  <button id="btn-add-interested"></button>
+  <button id="sv-crs"></button>
+  <input id="cr-ti"><input id="cr-ur"><input id="cr-date"><input id="cr-contact"><input id="cr-tag"><textarea id="cr-desc"></textarea><textarea id="cr-notes"></textarea><input id="cr-price"><input id="cr-duration"><select id="cr-form"></select>
+  <input id="crs-edit-id"><input id="crs-status-val"><h3 id="m-crs-title"></h3>
+  <button id="btn-conf"></button>
+  <button id="sv-conf"></button>
+  <input id="cf-na"><input id="cf-dt" type="date"><input id="cf-lo"><textarea id="cf-le"></textarea><textarea id="cf-sp"></textarea><textarea id="cf-ac"></textarea>
+  <button id="btn-app"></button>
+  <button id="sv-app"></button>
+  <input id="ap-co"><input id="ap-ro"><input id="ap-ur"><input id="ap-dt" type="date"><select id="ap-st"></select>
+  <textarea id="ap-req"></textarea><textarea id="ap-resp"></textarea><textarea id="ap-cv"></textarea><textarea id="ap-int"></textarea><textarea id="ap-no"></textarea>
+  <button id="ap-pill-bkk"></button><button id="ap-pill-sgp"></button>
+  <div id="app-loc-bar"></div><div id="app-f"></div>
+  <h3 id="m-app-title"></h3>
+  <button id="btn-cv-add"></button><button id="sv-cv-section"></button>
+  <h3 id="m-cv-title"></h3>
+  <input id="cv-sec-name"><textarea id="cv-sec-content"></textarea><textarea id="cv-sec-notes"></textarea><input id="cv-sec-date" type="date">
+  <button id="btn-roadmap-add"></button><button id="sv-roadmap-step"></button>
+  <h3 id="m-roadmap-title"></h3>
+  <input id="rs-title"><select id="rs-cat"></select><select id="rs-status"></select><input id="rs-date" type="date"><textarea id="rs-notes"></textarea>
+  <button id="btn-watch-add"></button><button id="sv-watch"></button>
+  <h3 id="m-watch-title"></h3>
+  <input id="wc-name"><select id="wc-loc"></select><input id="wc-type"><textarea id="wc-roles"></textarea><input id="wc-url"><textarea id="wc-notes"></textarea>
+  <div id="watch-loc-bar"></div>
+  <button id="btn-masters-add"></button><button id="sv-masters"></button>
+  <h3 id="m-masters-title"></h3>
+  <input id="ms-prog"><input id="ms-uni"><input id="ms-loc"><input id="ms-dur"><input id="ms-cost"><input id="ms-url"><textarea id="ms-notes"></textarea><input id="ms-deadline" type="date">
+  <button id="btn-todo-add"></button><button id="sv-todo"></button>
+  <h3 id="m-todo-title"></h3>
+  <input id="td-text"><select id="td-cat"></select><input id="td-date" type="date"><input id="td-notes">
+  <div id="todo-filter-bar"></div>
+  <div id="crs-notes-modules"></div>
+  <div id="crs-notes-title"></div>
+  <span id="notes-save-badge"></span>
+  <!-- cat chips needed by initCatChips -->
+  <button class="cat-chip workout sel" data-cat="workout"></button>
+</div>
+<!-- ══════════════════════════════════════════════════ -->
+
+
+<!-- ── MOBILE PANELS ── -->
+<div class="mob-panels">
+
+  <!-- OVERVIEW -->
+  <div class="mob-panel active" id="mp-home">
+    <div class="mob-content">
+      <div class="mob-stats" id="mob-stats"></div>
+      <div class="divl"><span>This Week</span></div>
+      <div class="wk-week" id="mob-week"></div>
+      <div class="divl"><span>Consistency</span></div>
+      <div class="glass" style="padding:1.2rem;margin-bottom:1rem" id="mob-chart"></div>
+      <button class="btn btn-g" id="mob-goal-btn" style="width:100%;margin-bottom:1rem">Set Weekly Goal</button>
+    </div>
+  </div>
+
+  <!-- LOG -->
   <div class="mob-panel" id="mp-log">
     <div class="mob-content">
       <div class="log-card glass">
         <div class="ptitle" style="font-size:20px;margin-bottom:1rem">Log Workout</div>
-
-        <!-- Workout type grid -->
         <div class="type-grid" id="quick-type-grid"></div>
-
         <div class="log-fields">
           <div class="fld">
             <label>Date</label>
             <input id="ql-dt" type="date">
           </div>
           <div class="r3">
-            <div class="fld"><label>Duration (min)</label><input id="ql-dur" type="number" min="0" inputmode="numeric" placeholder="45"></div>
-            <div class="fld"><label>Calories</label><input id="ql-cal" type="number" min="0" inputmode="numeric" placeholder="300"></div>
-            <div class="fld"><label>Distance (km)</label><input id="ql-dis" type="number" min="0" step="0.1" inputmode="decimal" placeholder="—"></div>
+            <div class="fld"><label>Mins</label><input id="ql-dur" type="number" min="0" inputmode="numeric" placeholder="45"></div>
+            <div class="fld"><label>kcal</label><input id="ql-cal" type="number" min="0" inputmode="numeric" placeholder="300"></div>
+            <div class="fld"><label>km</label><input id="ql-dis" type="number" min="0" step="0.1" inputmode="decimal" placeholder="—"></div>
           </div>
           <button class="btn btn-p log-submit" id="ql-save">Save Workout ✓</button>
         </div>
@@ -62,10 +195,10 @@
     </div>
   </div>
 
-  <!-- HISTORY: all sessions grouped by month -->
+  <!-- HISTORY -->
   <div class="mob-panel" id="mp-history">
     <div class="mob-content">
-      <div id="wk-list"></div>
+      <div id="mob-history"></div>
     </div>
   </div>
 
@@ -87,22 +220,22 @@
   </button>
 </nav>
 
-<!-- Weekly Goal modal (kept for goal setting) -->
+<!-- Weekly Goal modal -->
 <div class="modal" id="m-wk-goal">
   <div class="mhdr"><h3>Weekly Goal</h3><button class="mx" data-close="m-wk-goal">×</button></div>
   <div class="mbody">
-    <div class="fld"><label>Sessions per week</label><input id="wk-goal-val" type="number" min="1" max="14" inputmode="numeric" placeholder="4"></div>
+    <div class="fld"><label>Sessions per week</label><input id="mob-goal-val" type="number" min="1" max="14" inputmode="numeric" placeholder="4"></div>
     <p style="font-size:11px;color:var(--t3);font-style:italic">Shows as a goal line on your consistency chart</p>
   </div>
-  <div class="mfoot"><button class="btn btn-g" data-close="m-wk-goal">Cancel</button><button class="btn btn-p" id="sv-wk-goal">Save</button></div>
+  <div class="mfoot"><button class="btn btn-g" data-close="m-wk-goal">Cancel</button><button class="btn btn-p" id="mob-sv-goal">Save</button></div>
 </div>
 
 <!-- Delete confirm toast -->
 <div class="del-toast" id="del-toast" style="display:none">
-  <span id="del-toast-msg">Delete this workout?</span>
+  <span>Delete this workout?</span>
   <div style="display:flex;gap:8px;margin-top:10px">
     <button class="btn btn-g btn-sm" id="del-cancel">Cancel</button>
-    <button class="btn btn-p btn-sm" id="del-confirm" style="background:#f43f5e;box-shadow:none">Delete</button>
+    <button class="btn btn-sm" id="del-confirm" style="background:#f43f5e;color:#fff;border:none;padding:5px 13px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer">Delete</button>
   </div>
 </div>
 

@@ -1,4 +1,5 @@
-// mobile.js — runs after app.js, patches workout UI for mobile
+// mobile.js — runs after app.js, drives the mobile UI
+// app.js renders into hidden ghost elements; we copy results into visible mobile ones
 
 // ── Panel switcher ────────────────────────────────────
 window.switchPanel = function(panelId, btn) {
@@ -7,6 +8,19 @@ window.switchPanel = function(panelId, btn) {
   document.getElementById(panelId)?.classList.add('active');
   btn?.classList.add('active');
 };
+
+// ── Copy rendered HTML from ghost → visible elements ──
+function syncFromGhost() {
+  const copy = (from, to) => {
+    const src = document.getElementById(from);
+    const dst = document.getElementById(to);
+    if (src && dst) dst.innerHTML = src.innerHTML;
+  };
+  copy('wk-stats',  'mob-stats');
+  copy('wk-week',   'mob-week');
+  copy('wk-chart',  'mob-chart');
+  copy('wk-list',   'mob-history');
+}
 
 // ── Workout types ─────────────────────────────────────
 const WK_TYPES = [
@@ -29,20 +43,21 @@ function buildTypeGrid() {
   const grid = document.getElementById('quick-type-grid');
   if (!grid) return;
   grid.innerHTML = WK_TYPES.map(t =>
-    `<button class="type-chip${t.v === selectedType ? ' sel' : ''}" data-v="${t.v}" onclick="pickType('${t.v}', this)">
+    `<button class="type-chip${t.v === selectedType ? ' sel' : ''}" data-v="${t.v}">
       <span class="tc-ico">${t.ico}</span>
       <span class="tc-lbl">${t.lbl}</span>
     </button>`
   ).join('');
+  grid.querySelectorAll('.type-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      selectedType = chip.dataset.v;
+      grid.querySelectorAll('.type-chip').forEach(c => c.classList.remove('sel'));
+      chip.classList.add('sel');
+    });
+  });
 }
 
-window.pickType = function(val, el) {
-  selectedType = val;
-  document.querySelectorAll('.type-chip').forEach(c => c.classList.remove('sel'));
-  el.classList.add('sel');
-};
-
-// ── Save from quick-log form ──────────────────────────
+// ── Quick-log save ────────────────────────────────────
 function wireQuickLog() {
   const saveBtn = document.getElementById('ql-save');
   if (!saveBtn) return;
@@ -52,26 +67,19 @@ function wireQuickLog() {
   if (dtInput) dtInput.value = new Date().toISOString().split('T')[0];
 
   saveBtn.addEventListener('click', async () => {
-    // Reach into app.js state via the existing sv-wk flow
-    // We mirror the exact same save logic by populating app.js fields and clicking save
-    const tp = selectedType;
-    const dt = document.getElementById('ql-dt')?.value || new Date().toISOString().split('T')[0];
-    const dur = parseInt(document.getElementById('ql-dur')?.value) || 0;
-    const cal = parseInt(document.getElementById('ql-cal')?.value) || 0;
-    const dis = parseFloat(document.getElementById('ql-dis')?.value) || 0;
-
-    // Populate the hidden app.js modal fields so its save handler works
     const setV = (id, val) => { const e = document.getElementById(id); if (e) e.value = val; };
-    setV('wk-tp', tp);
-    setV('wk-dt', dt);
-    setV('wk-dur', dur || '');
-    setV('wk-cal', cal || '');
-    setV('wk-dis', dis || '');
 
-    // Trigger app.js save button
+    // Push values into app.js ghost fields
+    setV('wk-tp',  selectedType);
+    setV('wk-dt',  document.getElementById('ql-dt')?.value || new Date().toISOString().split('T')[0]);
+    setV('wk-dur', document.getElementById('ql-dur')?.value || '');
+    setV('wk-cal', document.getElementById('ql-cal')?.value || '');
+    setV('wk-dis', document.getElementById('ql-dis')?.value || '');
+
+    // Trigger app.js save
     document.getElementById('sv-wk')?.click();
 
-    // Visual feedback
+    // Feedback
     saveBtn.textContent = 'Saved! ✓';
     saveBtn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
     setTimeout(() => {
@@ -84,79 +92,95 @@ function wireQuickLog() {
     setV('ql-cal', '');
     setV('ql-dis', '');
 
-    // Switch to overview after save
+    // Sync and switch to overview
     setTimeout(() => {
-      const homeBtn = document.querySelector('.bn[data-panel="mp-home"]');
-      switchPanel('mp-home', homeBtn);
-    }, 600);
+      syncFromGhost();
+      switchPanel('mp-home', document.querySelector('.bn[data-panel="mp-home"]'));
+    }, 400);
   });
 }
 
-// ── Delete toast (replaces window.dWk) ───────────────
+// ── Weekly goal ───────────────────────────────────────
+function wireGoal() {
+  const openBtn = document.getElementById('mob-goal-btn');
+  const saveBtn = document.getElementById('mob-sv-goal');
+  const valInput = document.getElementById('mob-goal-val');
+
+  openBtn?.addEventListener('click', () => {
+    // Read current goal from app.js ghost input
+    valInput.value = document.getElementById('wk-goal-val')?.value || 4;
+    openMob('m-wk-goal');
+  });
+
+  saveBtn?.addEventListener('click', () => {
+    // Push value into app.js ghost field and trigger its save button
+    const ghost = document.getElementById('wk-goal-val');
+    if (ghost) ghost.value = valInput.value;
+    document.getElementById('sv-wk-goal')?.click();
+    closeMob('m-wk-goal');
+    setTimeout(syncFromGhost, 300);
+  });
+}
+
+// ── Delete confirm toast ──────────────────────────────
 let pendingDeleteIdx = null;
 
-function wireDeleteToast() {
-  const toast = document.getElementById('del-toast');
-  const confirmBtn = document.getElementById('del-confirm');
-  const cancelBtn = document.getElementById('del-cancel');
+function wireDelete() {
+  const toast   = document.getElementById('del-toast');
+  const confirm = document.getElementById('del-confirm');
+  const cancel  = document.getElementById('del-cancel');
 
-  // Override window.dWk with a confirmation toast
-  const origDWk = window.dWk;
-  window.dWk = function(idx) {
+  // Store the real dWk from app.js
+  const realDWk = window.dWk;
+
+  // Replace with toast version
+  window.dWk = (idx) => {
     pendingDeleteIdx = idx;
     toast.style.display = 'block';
   };
 
-  confirmBtn?.addEventListener('click', async () => {
-    if (pendingDeleteIdx !== null) {
-      // Call original
-      const origDWk = window._origDWk;
-      if (origDWk) await origDWk(pendingDeleteIdx);
-      pendingDeleteIdx = null;
+  confirm?.addEventListener('click', async () => {
+    if (pendingDeleteIdx !== null && realDWk) {
+      await realDWk(pendingDeleteIdx);
+      setTimeout(syncFromGhost, 300);
     }
+    pendingDeleteIdx = null;
     toast.style.display = 'none';
   });
 
-  cancelBtn?.addEventListener('click', () => {
+  cancel?.addEventListener('click', () => {
     pendingDeleteIdx = null;
     toast.style.display = 'none';
   });
 }
 
-// ── Weekly goal button on overview ───────────────────
-function addGoalButton() {
-  // Add a small gear button to the overview stats area
-  const statsRow = document.getElementById('wk-stats');
-  if (!statsRow) return;
-
-  const existing = document.getElementById('mob-goal-btn');
-  if (existing) return;
-
-  const btn = document.createElement('button');
-  btn.id = 'mob-goal-btn';
-  btn.className = 'btn btn-g';
-  btn.textContent = 'Set Goal';
-  btn.style.cssText = 'font-size:11px;padding:6px 14px;margin-top:.5rem;width:100%';
-  btn.onclick = () => {
-    document.getElementById('wk-goal-val').value = window._wkGoal || 4;
-    openMob('m-wk-goal');
-  };
-  statsRow.insertAdjacentElement('afterend', btn);
-}
-
-// ── Open/close modals from mobile.js ─────────────────
+// ── Modal helpers ─────────────────────────────────────
 function openMob(id) {
   document.getElementById('ov')?.classList.add('open');
   document.getElementById(id)?.classList.add('open');
 }
+function closeMob(id) {
+  document.getElementById('ov')?.classList.remove('open');
+  document.getElementById(id)?.classList.remove('open');
+}
 
-// ── Patch renderWorkouts to also refresh mobile panels ─
+// Wire overlay close
+document.getElementById('ov')?.addEventListener('click', () => {
+  document.querySelectorAll('.modal.open').forEach(m => m.classList.remove('open'));
+  document.getElementById('ov')?.classList.remove('open');
+});
+document.querySelectorAll('[data-close]').forEach(b => {
+  b.addEventListener('click', () => closeMob(b.dataset.close));
+});
+
+// ── Patch renderWorkouts so mobile syncs automatically ─
 function patchRenderWorkouts() {
   const orig = window.renderWorkouts;
   if (!orig) return;
   window.renderWorkouts = function() {
     orig.call(this);
-    addGoalButton();
+    // Small delay so app.js finishes writing to ghost elements
+    setTimeout(syncFromGhost, 50);
   };
 }
 
@@ -164,20 +188,12 @@ function patchRenderWorkouts() {
 document.addEventListener('DOMContentLoaded', () => {
   buildTypeGrid();
   wireQuickLog();
-  wireDeleteToast();
+  wireGoal();
 
-  // Patch after app.js has had a chance to define renderWorkouts
+  // Wait for app.js to finish loading Firebase data, then patch & sync
   setTimeout(() => {
     patchRenderWorkouts();
-    addGoalButton();
-
-    // Store original dWk so confirm can call it
-    window._origDWk = window.dWk;
-    wireDeleteToast();
-  }, 100);
-
-  // Prevent double-tap zoom on buttons
-  document.querySelectorAll('button, .type-chip').forEach(el => {
-    el.addEventListener('touchend', e => e.preventDefault(), { passive: false });
-  });
+    wireDelete();
+    syncFromGhost();
+  }, 2500); // app.js loads Firebase async, give it time
 });
