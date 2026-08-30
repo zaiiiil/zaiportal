@@ -2,21 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>my portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>workouts</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="mobile.css">
 </head>
 <body>
 
-<!-- BLOBS -->
 <div class="blob b1"></div>
 <div class="blob b2"></div>
 <div class="blob b3"></div>
-
-<!-- OVERLAY -->
 <div class="ov" id="ov"></div>
 
-<!-- ══════════════ HEADER ══════════════ -->
+<!-- ── HEADER ── -->
 <header class="hdr">
   <a class="logo-pill" href="#">my portal</a>
   <div class="hdr-right">
@@ -25,690 +23,90 @@
   </div>
 </header>
 
-<!-- ══════════════ SECTION 1 — PERSONAL ══════════════ -->
-<div class="sec-label">✦ Personal</div>
-<nav class="tabs" data-section="s1">
-  <button class="tab active" data-t="habits">Goals & Habits</button>
-  <button class="tab" data-t="workout">Workouts <span class="tcnt" id="cnt-wk">0</span></button>
-  <button class="tab" data-t="calendar">Calendar</button>
-  <button class="tab" data-t="todos">To-Do <span class="tcnt" id="cnt-todos">0</span></button>
-</nav>
+<!-- ── PANELS ── -->
+<div class="mob-panels">
 
-<div class="panels" data-section="s1">
-  <div class="main-wrap">
-
-    <!-- HABITS & GOALS -->
-    <div class="panel active" id="p-habits">
-      <div class="ph">
-        <div><div class="ptitle">Goals & Habits</div><div class="psub">Daily check-ins · build your streak</div></div>
-        <div class="pact">
-          <button class="btn btn-g" id="btn-goal">+ Goal</button>
-          <button class="btn btn-p" id="btn-habit">+ Habit</button>
-        </div>
-      </div>
-      <div class="divl"><span>Today's Habits</span></div>
-      <div id="habit-list"></div>
-      <div class="divl"><span>Goals</span></div>
-      <div id="goal-list"></div>
-    </div>
-
-    <!-- WORKOUTS -->
-    <div class="panel" id="p-workout">
-      <div class="ph">
-        <div><div class="ptitle">Workout Tracker</div><div class="psub">Log sessions · track your week · consistency chart</div></div>
-        <div class="pact">
-          <button class="btn btn-g" id="btn-wk-goal">Set Weekly Goal</button>
-          <button class="btn btn-p" id="btn-wk">+ Log Workout</button>
-        </div>
-      </div>
+  <!-- HOME: stats + this week -->
+  <div class="mob-panel active" id="mp-home">
+    <div class="mob-content">
       <div class="stats-row" id="wk-stats"></div>
       <div class="divl"><span>This Week</span></div>
       <div class="wk-week" id="wk-week"></div>
-      <div class="divl"><span>Week by Week Consistency</span></div>
+      <div class="divl"><span>Week by Week</span></div>
       <div class="glass" style="padding:1.2rem;margin-bottom:1rem" id="wk-chart"></div>
-      <div class="divl"><span>All Sessions</span></div>
+    </div>
+  </div>
+
+  <!-- LOG: quick-log form always visible -->
+  <div class="mob-panel" id="mp-log">
+    <div class="mob-content">
+      <div class="log-card glass">
+        <div class="ptitle" style="font-size:20px;margin-bottom:1rem">Log Workout</div>
+
+        <!-- Workout type grid -->
+        <div class="type-grid" id="quick-type-grid"></div>
+
+        <div class="log-fields">
+          <div class="fld">
+            <label>Date</label>
+            <input id="ql-dt" type="date">
+          </div>
+          <div class="r3">
+            <div class="fld"><label>Duration (min)</label><input id="ql-dur" type="number" min="0" inputmode="numeric" placeholder="45"></div>
+            <div class="fld"><label>Calories</label><input id="ql-cal" type="number" min="0" inputmode="numeric" placeholder="300"></div>
+            <div class="fld"><label>Distance (km)</label><input id="ql-dis" type="number" min="0" step="0.1" inputmode="decimal" placeholder="—"></div>
+          </div>
+          <button class="btn btn-p log-submit" id="ql-save">Save Workout ✓</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY: all sessions grouped by month -->
+  <div class="mob-panel" id="mp-history">
+    <div class="mob-content">
       <div id="wk-list"></div>
     </div>
-
-    <!-- CALENDAR -->
-    <div class="panel" id="p-calendar">
-      <div class="ph">
-        <div><div class="ptitle">My Calendar</div><div class="psub">Weekly schedule · click any slot to add · workouts sync automatically</div></div>
-        <div class="pact">
-          <button class="btn btn-g" id="btn-cal-today">Today</button>
-          <button class="btn btn-p" id="btn-cal-add">+ Add Event</button>
-        </div>
-      </div>
-      <div class="legend">
-        <div class="leg-item"><div class="leg-dot" style="background:#8b5cf6"></div>Workout</div>
-        <div class="leg-item"><div class="leg-dot" style="background:#ec4899"></div>Social</div>
-        <div class="leg-item"><div class="leg-dot" style="background:#3b82f6"></div>Work</div>
-        <div class="leg-item"><div class="leg-dot" style="background:#10b981"></div>Personal</div>
-        <div class="leg-item"><div class="leg-dot" style="background:#f59e0b"></div>Other</div>
-      </div>
-      <div class="week-nav">
-        <button class="nav-btn" id="prev-wk">← Prev</button>
-        <span class="week-label" id="week-label"></span>
-        <button class="nav-btn" id="next-wk">Next →</button>
-      </div>
-      <div class="cal-wrap">
-        <div><div class="cal-grid" id="cal-grid"></div></div>
-        <div class="day-detail" id="day-detail">
-          <div class="dd-title" id="dd-title">Select a day</div>
-          <div id="dd-events"><div class="dd-empty">Click any day column to see events</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TO-DO LIST -->
-    <div class="panel" id="p-todos">
-      <div class="ph">
-        <div><div class="ptitle">To-Do List</div><div class="psub">Tasks, errands, reminders</div></div>
-        <button class="btn btn-p" id="btn-todo-add">+ Add Task</button>
-      </div>
-      <div class="fbar" id="todo-filter-bar">
-        <button class="fc active" data-tf="all">All</button>
-        <button class="fc" data-tf="today">Today</button>
-        <button class="fc" data-tf="work">Work</button>
-        <button class="fc" data-tf="personal">Personal</button>
-        <button class="fc" data-tf="errand">Errand</button>
-        <button class="fc" data-tf="done">Completed</button>
-      </div>
-      <div id="todo-list"></div>
-    </div>
-
   </div>
+
 </div>
 
-<!-- ══════════════ SECTION 2 — CAREER & KNOWLEDGE ══════════════ -->
-<div class="sec-label" style="top:58px">✦ Career & Knowledge</div>
-<nav class="tabs" data-section="s2" style="top:88px">
-  <button class="tab active" data-t="news">Daily Feed</button>
-  <button class="tab" data-t="media">Saved Media <span class="tcnt" id="cnt-med">0</span></button>
-  <button class="tab" data-t="courses">Courses <span class="tcnt" id="cnt-crs">0</span></button>
-  <button class="tab" data-t="conferences">Conferences <span class="tcnt" id="cnt-conf">0</span></button>
+<!-- ── BOTTOM NAV ── -->
+<nav class="bot-nav">
+  <button class="bn active" data-panel="mp-home" onclick="switchPanel('mp-home',this)">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <span>Overview</span>
+  </button>
+  <button class="bn bn-log" data-panel="mp-log" onclick="switchPanel('mp-log',this)">
+    <div class="bn-plus">+</div>
+    <span>Log</span>
+  </button>
+  <button class="bn" data-panel="mp-history" onclick="switchPanel('mp-history',this)">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+    <span>History</span>
+  </button>
 </nav>
 
-<div class="panels" data-section="s2">
-  <div class="main-wrap">
-
-    <!-- DAILY FEED -->
-    <div class="panel active" id="p-news">
-      <div class="ph">
-        <div><div class="ptitle">Today's Reading</div><div class="psub">Your daily news sources · click to open · save what matters</div></div>
-        <button class="btn btn-p" id="btn-art">+ Save Article</button>
-      </div>
-
-      <div class="divl"><span>World & General</span></div>
-      <div class="news-site-grid">
-        <a class="news-site-card" href="https://www.bbc.com/news" target="_blank">
-          <div class="nsc-logo" style="background:#bb1919;color:#fff">BBC</div>
-          <div class="nsc-info"><div class="nsc-name">BBC News</div><div class="nsc-desc">World news, politics, society</div></div>
-        </a>
-        <a class="news-site-card" href="https://www.economist.com" target="_blank">
-          <div class="nsc-logo" style="background:#e3120b;color:#fff">Ec</div>
-          <div class="nsc-info"><div class="nsc-name">The Economist</div><div class="nsc-desc">Global business, politics, ideas</div></div>
-        </a>
-        <a class="news-site-card" href="https://www.ft.com" target="_blank">
-          <div class="nsc-logo" style="background:#fff1e0;color:#a0522d;border:1px solid #f0c070">FT</div>
-          <div class="nsc-info"><div class="nsc-name">Financial Times</div><div class="nsc-desc">Finance, markets, global business</div></div>
-        </a>
-        <a class="news-site-card" href="https://www.reuters.com" target="_blank">
-          <div class="nsc-logo" style="background:#ff8000;color:#fff">R</div>
-          <div class="nsc-info"><div class="nsc-name">Reuters</div><div class="nsc-desc">Breaking news, unbiased reporting</div></div>
-        </a>
-      </div>
-
-      <div class="divl"><span>Science & Health</span></div>
-      <div class="news-site-grid">
-        <a class="news-site-card" href="https://www.nature.com/news" target="_blank">
-          <div class="nsc-logo" style="background:#0d47a1;color:#fff">N</div>
-          <div class="nsc-info"><div class="nsc-name">Nature News</div><div class="nsc-desc">Leading peer-reviewed science</div></div>
-        </a>
-        <a class="news-site-card" href="https://www.science.org/news" target="_blank">
-          <div class="nsc-logo" style="background:#1565c0;color:#fff">Sc</div>
-          <div class="nsc-info"><div class="nsc-name">Science</div><div class="nsc-desc">AAAS — top research findings</div></div>
-        </a>
-        <a class="news-site-card" href="https://www.statnews.com" target="_blank">
-          <div class="nsc-logo" style="background:#c0392b;color:#fff">ST</div>
-          <div class="nsc-info"><div class="nsc-name">STAT News</div><div class="nsc-desc">Health, medicine, life sciences</div></div>
-        </a>
-        <a class="news-site-card" href="https://www.thelancet.com" target="_blank">
-          <div class="nsc-logo" style="background:#8e24aa;color:#fff">L</div>
-          <div class="nsc-info"><div class="nsc-name">The Lancet</div><div class="nsc-desc">Medical journals & clinical research</div></div>
-        </a>
-      </div>
-
-      <div class="divl"><span>Biotech, Pharma & AI</span></div>
-      <div class="news-site-grid">
-        <a class="news-site-card" href="https://www.fiercebiotech.com" target="_blank">
-          <div class="nsc-logo" style="background:#00897b;color:#fff">FB</div>
-          <div class="nsc-info"><div class="nsc-name">Fierce Biotech</div><div class="nsc-desc">Biotech industry news & deals</div></div>
-        </a>
-        <a class="news-site-card" href="https://www.biopharmdive.com" target="_blank">
-          <div class="nsc-logo" style="background:#1976d2;color:#fff">BD</div>
-          <div class="nsc-info"><div class="nsc-name">BioPharma Dive</div><div class="nsc-desc">Drug development & FDA approvals</div></div>
-        </a>
-        <a class="news-site-card" href="https://endpts.com" target="_blank">
-          <div class="nsc-logo" style="background:#e65100;color:#fff">EP</div>
-          <div class="nsc-info"><div class="nsc-name">Endpoints News</div><div class="nsc-desc">Clinical trials, biotech pipeline</div></div>
-        </a>
-        <a class="news-site-card" href="https://www.technologyreview.com" target="_blank">
-          <div class="nsc-logo" style="background:#212121;color:#fff">TR</div>
-          <div class="nsc-info"><div class="nsc-name">MIT Tech Review</div><div class="nsc-desc">AI, biotech, emerging technology</div></div>
-        </a>
-      </div>
-
-      <div class="divl"><span>Business & Markets</span></div>
-      <div class="news-site-grid">
-        <a class="news-site-card" href="https://www.bloomberg.com" target="_blank">
-          <div class="nsc-logo" style="background:#1a1a1a;color:#fff">Bl</div>
-          <div class="nsc-info"><div class="nsc-name">Bloomberg</div><div class="nsc-desc">Markets, finance, global economy</div></div>
-        </a>
-        <a class="news-site-card" href="https://hbr.org" target="_blank">
-          <div class="nsc-logo" style="background:#c62828;color:#fff">HBR</div>
-          <div class="nsc-info"><div class="nsc-name">Harvard Business Review</div><div class="nsc-desc">Strategy, leadership, management</div></div>
-        </a>
-        <a class="news-site-card" href="https://techcrunch.com" target="_blank">
-          <div class="nsc-logo" style="background:#00a651;color:#fff">TC</div>
-          <div class="nsc-info"><div class="nsc-name">TechCrunch</div><div class="nsc-desc">Startups, VC, tech industry</div></div>
-        </a>
-        <a class="news-site-card" href="https://www.axios.com" target="_blank">
-          <div class="nsc-logo" style="background:#6366f1;color:#fff">Ax</div>
-          <div class="nsc-info"><div class="nsc-name">Axios</div><div class="nsc-desc">Smart, concise news briefings</div></div>
-        </a>
-      </div>
-
-      <div class="divl"><span>Saved Articles</span></div>
-      <div id="saved-arts"></div>
-    </div>
-
-    <!-- SAVED MEDIA -->
-    <div class="panel" id="p-media">
-      <div class="ph">
-        <div><div class="ptitle">Saved Media</div><div class="psub">Videos · Podcasts · Articles · editable notes</div></div>
-        <button class="btn btn-p" id="btn-med">+ Add Media</button>
-      </div>
-      <div class="fbar" id="med-type-bar">
-        <button class="fc active" data-tv="all">All</button>
-        <button class="fc" data-tv="YouTube">▶ YouTube</button>
-        <button class="fc" data-tv="Podcast">🎧 Podcasts</button>
-        <button class="fc" data-tv="Article">📄 Articles</button>
-        <button class="fc" data-tv="Webinar">🎙 Webinars</button>
-        <button class="fc" data-tv="Interview">🎤 Interviews</button>
-      </div>
-      <div class="fbar" id="med-tag-bar">
-        <button class="fc active" data-tf="all">All Topics</button>
-        <button class="fc" data-tf="science">Science</button>
-        <button class="fc" data-tf="business">Business</button>
-        <button class="fc" data-tf="health">Health</button>
-        <button class="fc" data-tf="tech">Tech</button>
-        <button class="fc" data-tf="pharma">Pharma</button>
-        <button class="fc" data-tf="aitech">AI & Biotech</button>
-        <button class="fc" data-tf="general">General</button>
-      </div>
-      <div id="med-list"></div>
-    </div>
-
-    <!-- COURSES -->
-    <div class="panel" id="p-courses">
-      <div class="ph">
-        <div><div class="ptitle">Courses</div><div class="psub">Following & interested · editable · rich notes</div></div>
-        <div class="pact">
-          <button class="btn btn-g" id="btn-add-interested">+ Interested</button>
-          <button class="btn btn-p" id="btn-add-following">+ Following</button>
-        </div>
-      </div>
-      <div class="divl"><span>Currently Following</span></div>
-      <div id="crs-following"></div>
-      <div class="divl"><span>Interested In</span></div>
-      <div id="crs-interested"></div>
-    </div>
-
-    <!-- CONFERENCES -->
-    <div class="panel" id="p-conferences">
-      <div class="ph">
-        <div><div class="ptitle">Conference Notes</div><div class="psub">Log events · capture insights</div></div>
-        <button class="btn btn-p" id="btn-conf">+ Add Conference</button>
-      </div>
-      <div id="conf-list"></div>
-    </div>
-
-    <!-- APPLICATIONS -->
-  </div>
-</div>
-
-
-<!-- ══════════════ SECTION 3 — CAREER ══════════════ -->
-<div class="sec-label" style="top:58px">✦ Career</div>
-<nav class="tabs" data-section="s3" style="top:88px">
-  <button class="tab active" data-t="career-apps">Applications <span class="tcnt" id="cnt-apps">0</span></button>
-  <button class="tab" data-t="career-cv">CV & Profile</button>
-  <button class="tab" data-t="career-plan">Career Roadmap</button>
-  <button class="tab" data-t="career-watch">Company Watchlist</button>
-  <button class="tab" data-t="career-masters">Masters / MBA</button>
-</nav>
-
-<div class="panels" data-section="s3">
-  <div class="main-wrap">
-
-    <!-- APPLICATIONS -->
-    <div class="panel active" id="p-career-apps">
-      <div class="ph">
-        <div><div class="ptitle">Application Tracker</div><div class="psub">Bangkok & Singapore pipeline</div></div>
-        <button class="btn btn-p" id="btn-app">+ Log Application</button>
-      </div>
-      <div class="stats-row" id="app-stats"></div>
-      <div class="fbar" id="app-loc-bar">
-        <button class="fc active" data-al="all">All Locations</button>
-        <button class="fc" data-al="bkk" style="color:#92400e">Bangkok</button>
-        <button class="fc" data-al="sgp" style="color:#065f46">Singapore</button>
-      </div>
-      <div class="fbar" id="app-f">
-        <button class="fc active" data-af="all">All Statuses</button>
-        <button class="fc" data-af="toapply">To Apply</button>
-        <button class="fc" data-af="applied">Applied</button>
-        <button class="fc" data-af="interview">Interview</button>
-        <button class="fc" data-af="offer">Offer</button>
-        <button class="fc" data-af="rejected">Rejected</button>
-      </div>
-      <div id="app-list"></div>
-    </div>
-
-    <!-- CV & PROFILE -->
-    <div class="panel" id="p-career-cv">
-      <div class="ph">
-        <div><div class="ptitle">CV & Profile Content</div><div class="psub">Store your profile descriptions, headlines, and CV content</div></div>
-        <button class="btn btn-p" id="btn-cv-add">+ Add Section</button>
-      </div>
-      <div id="cv-sections-list"></div>
-    </div>
-
-    <!-- CAREER ROADMAP -->
-    <div class="panel" id="p-career-plan">
-      <div class="ph">
-        <div><div class="ptitle">Career Roadmap</div><div class="psub">Drag & drop steps to plan your path</div></div>
-        <button class="btn btn-p" id="btn-roadmap-add">+ Add Step</button>
-      </div>
-      <div id="roadmap-board"></div>
-    </div>
-
-    <!-- COMPANY WATCHLIST -->
-    <div class="panel" id="p-career-watch">
-      <div class="ph">
-        <div><div class="ptitle">Company Watchlist</div><div class="psub">Companies to keep an eye on in Bangkok & Singapore</div></div>
-        <button class="btn btn-p" id="btn-watch-add">+ Add Company</button>
-      </div>
-      <div class="fbar" id="watch-loc-bar">
-        <button class="fc active" data-wl="all">All</button>
-        <button class="fc" data-wl="bkk" style="color:#92400e">Bangkok</button>
-        <button class="fc" data-wl="sgp" style="color:#065f46">Singapore</button>
-      </div>
-      <div id="watchlist"></div>
-    </div>
-
-    <!-- MASTERS / MBA -->
-    <div class="panel" id="p-career-masters">
-      <div class="ph">
-        <div><div class="ptitle">Masters & MBA Programs</div><div class="psub">Programs you're considering · deadlines · notes</div></div>
-        <button class="btn btn-p" id="btn-masters-add">+ Add Program</button>
-      </div>
-      <div id="masters-list"></div>
-    </div>
-
-  </div>
-</div>
-
-<!-- CV Section modal -->
-<div class="modal" id="m-cv-section">
-  <div class="mhdr"><h3 id="m-cv-title">Add CV Section</h3><button class="mx" data-close="m-cv-section">×</button></div>
-  <div class="mbody">
-    <div class="fld"><label>Section Name</label><input id="cv-sec-name" placeholder="e.g. LinkedIn Headline, Profile Summary, Job Title"></div>
-    <div class="fld"><label>Content</label><textarea id="cv-sec-content" style="min-height:120px" placeholder="Paste your current content here..."></textarea></div>
-    <div class="fld"><label>Notes / What to improve</label><textarea id="cv-sec-notes" style="min-height:80px" placeholder="Ideas, feedback, things to update..."></textarea></div>
-    <div class="fld"><label>Last Updated</label><input id="cv-sec-date" type="date"></div>
-  </div>
-  <div class="mfoot"><button class="btn btn-g" data-close="m-cv-section">Cancel</button><button class="btn btn-p" id="sv-cv-section">Save</button></div>
-</div>
-
-<!-- Roadmap Step modal -->
-<div class="modal" id="m-roadmap-step">
-  <div class="mhdr"><h3 id="m-roadmap-title">Add Step</h3><button class="mx" data-close="m-roadmap-step">×</button></div>
-  <div class="mbody">
-    <div class="fld"><label>Step Title</label><input id="rs-title" placeholder="e.g. Get GCP certified, Apply to 5 CROs"></div>
-    <div class="fld"><label>Category</label>
-      <select id="rs-cat">
-        <option value="skill">Skill / Certification</option>
-        <option value="apply">Job Application</option>
-        <option value="network">Networking</option>
-        <option value="study">Study / Research</option>
-        <option value="milestone">Milestone</option>
-      </select>
-    </div>
-    <div class="r2">
-      <div class="fld"><label>Target Date</label><input id="rs-date" type="date"></div>
-      <div class="fld"><label>Status</label>
-        <select id="rs-status">
-          <option value="todo">To Do</option>
-          <option value="inprogress">In Progress</option>
-          <option value="done">Done</option>
-        </select>
-      </div>
-    </div>
-    <div class="fld"><label>Notes</label><textarea id="rs-notes" placeholder="Details, resources, action items..."></textarea></div>
-  </div>
-  <div class="mfoot"><button class="btn btn-g" data-close="m-roadmap-step">Cancel</button><button class="btn btn-p" id="sv-roadmap-step">Save</button></div>
-</div>
-
-<!-- Company Watchlist modal -->
-<div class="modal" id="m-watch">
-  <div class="mhdr"><h3 id="m-watch-title">Add Company</h3><button class="mx" data-close="m-watch">×</button></div>
-  <div class="mbody">
-    <div class="r2">
-      <div class="fld"><label>Company Name</label><input id="wc-name" placeholder="e.g. ICON plc"></div>
-      <div class="fld"><label>Location</label>
-        <select id="wc-loc">
-          <option value="bkk">Bangkok</option>
-          <option value="sgp">Singapore</option>
-          <option value="both">Both</option>
-        </select>
-      </div>
-    </div>
-    <div class="fld"><label>Type / Industry</label><input id="wc-type" placeholder="e.g. CRO, Pharma MNC, Biotech"></div>
-    <div class="fld"><label>Roles to look out for</label><textarea id="wc-roles" placeholder="e.g. CRA, Site Management Associate, Clinical Data Coordinator"></textarea></div>
-    <div class="fld"><label>Website / Careers Page</label><input id="wc-url" type="url" placeholder="https://..."></div>
-    <div class="fld"><label>Notes</label><textarea id="wc-notes" placeholder="Contacts, insights, why you like this company..."></textarea></div>
-  </div>
-  <div class="mfoot"><button class="btn btn-g" data-close="m-watch">Cancel</button><button class="btn btn-p" id="sv-watch">Save</button></div>
-</div>
-
-<!-- Masters / MBA modal -->
-<div class="modal" id="m-masters">
-  <div class="mhdr"><h3 id="m-masters-title">Add Program</h3><button class="mx" data-close="m-masters">×</button></div>
-  <div class="mbody">
-    <div class="fld"><label>Program Name</label><input id="ms-prog" placeholder="e.g. MSc Clinical Research, MBA Healthcare"></div>
-    <div class="fld"><label>University</label><input id="ms-uni" placeholder="e.g. Mahidol, NUS, INSEAD"></div>
-    <div class="r2">
-      <div class="fld"><label>Country / Location</label><input id="ms-loc" placeholder="e.g. Thailand, Singapore, France"></div>
-      <div class="fld"><label>Duration</label><input id="ms-dur" placeholder="e.g. 2 years, 18 months"></div>
-    </div>
-    <div class="r2">
-      <div class="fld"><label>Application Deadline</label><input id="ms-deadline" type="date"></div>
-      <div class="fld"><label>Tuition / Cost</label><input id="ms-cost" placeholder="e.g. ฿500,000 / year"></div>
-    </div>
-    <div class="fld"><label>Program URL</label><input id="ms-url" type="url" placeholder="https://..."></div>
-    <div class="fld"><label>Notes / Why interested</label><textarea id="ms-notes" placeholder="Why this program, pros/cons, requirements to meet..."></textarea></div>
-  </div>
-  <div class="mfoot"><button class="btn btn-g" data-close="m-masters">Cancel</button><button class="btn btn-p" id="sv-masters">Save</button></div>
-</div>
-
-<!-- ══════════════ MODALS ══════════════ -->
-
-<!-- Habit -->
-<div class="modal" id="m-habit">
-  <div class="mhdr"><h3>Add Habit</h3><button class="mx" data-close="m-habit">×</button></div>
-  <div class="mbody">
-    <div class="fld"><label>Name</label><input id="hb-n" placeholder="e.g. Read a paper, Meditate"></div>
-    <div class="fld"><label>Emoji</label><input id="hb-e" placeholder="🌸" maxlength="2" style="width:64px;font-size:18px"></div>
-  </div>
-  <div class="mfoot"><button class="btn btn-g" data-close="m-habit">Cancel</button><button class="btn btn-p" id="sv-habit">Add</button></div>
-</div>
-
-<!-- Goal -->
-<div class="modal" id="m-goal">
-  <div class="mhdr"><h3>Add Goal</h3><button class="mx" data-close="m-goal">×</button></div>
-  <div class="mbody">
-    <div class="fld"><label>Goal</label><input id="gl-t" placeholder="e.g. Land a biotech internship by June"></div>
-    <div class="r2">
-      <div class="fld"><label>Category</label>
-        <select id="gl-c"><option value="career">Career</option><option value="learning">Learning</option><option value="health">Health</option><option value="research">Research</option><option value="personal">Personal</option></select>
-      </div>
-      <div class="fld"><label>Deadline</label><input id="gl-d" type="date"></div>
-    </div>
-    <div class="fld"><label>Progress %</label><input id="gl-p" type="number" min="0" max="100" placeholder="0"></div>
-    <div class="fld"><label>Notes</label><textarea id="gl-n" placeholder="Steps & milestones…"></textarea></div>
-  </div>
-  <div class="mfoot"><button class="btn btn-g" data-close="m-goal">Cancel</button><button class="btn btn-p" id="sv-goal">Save</button></div>
-</div>
-
-<!-- Workout -->
-<div class="modal" id="m-wk">
-  <div class="mhdr"><h3>Log Workout</h3><button class="mx" data-close="m-wk">×</button></div>
-  <div class="mbody">
-    <div class="fld"><label>Type</label>
-      <select id="wk-tp">
-        <option value="elliptical">🔵 Elliptical</option><option value="run">🏃 Run</option>
-        <option value="incline">⛰️ Incline Walk</option><option value="stairs">🪜 Stair Master</option>
-        <option value="pump">🏋️ Body Pump</option><option value="sculpt">💪 Sculpt</option>
-        <option value="reformer">🧘 Reformer Pilates</option><option value="matpilates">🌸 Mat Pilates</option>
-        <option value="barre">🩰 Barre</option>
-        <option value="weights">🏋️‍♀️ Weights</option>
-        <option value="trainer">👟 Personal Trainer</option>
-      </select>
-    </div>
-    <div class="fld"><label>Date</label><input id="wk-dt" type="date"></div>
-    <div class="r3">
-      <div class="fld"><label>Duration (min)</label><input id="wk-dur" type="number" min="0" placeholder="45"></div>
-      <div class="fld"><label>Calories</label><input id="wk-cal" type="number" min="0" placeholder="300"></div>
-      <div class="fld"><label>Distance (km)</label><input id="wk-dis" type="number" min="0" step="0.1" placeholder="—"></div>
-    </div>
-  </div>
-  <div class="mfoot"><button class="btn btn-g" data-close="m-wk">Cancel</button><button class="btn btn-p" id="sv-wk">Save</button></div>
-</div>
-
-<!-- Weekly Goal -->
+<!-- Weekly Goal modal (kept for goal setting) -->
 <div class="modal" id="m-wk-goal">
-  <div class="mhdr"><h3>Weekly Workout Goal</h3><button class="mx" data-close="m-wk-goal">×</button></div>
+  <div class="mhdr"><h3>Weekly Goal</h3><button class="mx" data-close="m-wk-goal">×</button></div>
   <div class="mbody">
-    <div class="fld"><label>Sessions per week I'm aiming for</label><input id="wk-goal-val" type="number" min="1" max="14" placeholder="4"></div>
-    <p style="font-size:11px;color:var(--t3);font-style:italic">Shows as a goal line on your weekly consistency chart</p>
+    <div class="fld"><label>Sessions per week</label><input id="wk-goal-val" type="number" min="1" max="14" inputmode="numeric" placeholder="4"></div>
+    <p style="font-size:11px;color:var(--t3);font-style:italic">Shows as a goal line on your consistency chart</p>
   </div>
   <div class="mfoot"><button class="btn btn-g" data-close="m-wk-goal">Cancel</button><button class="btn btn-p" id="sv-wk-goal">Save</button></div>
 </div>
 
-<!-- Calendar Event -->
-<div class="modal" id="m-ev">
-  <div class="mhdr"><h3>Add Event</h3><button class="mx" data-close="m-ev">×</button></div>
-  <div class="mbody">
-    <div class="fld"><label>Event Name</label><input id="ev-name" placeholder="e.g. Dinner with friends"></div>
-    <div class="r2">
-      <div class="fld"><label>Date</label><input id="ev-date" type="date"></div>
-      <div class="fld"><label>Time</label><input id="ev-time" type="time"></div>
-    </div>
-    <div class="fld"><label>Duration</label>
-      <select id="ev-dur">
-        <option value="30">30 min</option><option value="60" selected>1 hour</option>
-        <option value="90">1.5 hours</option><option value="120">2 hours</option>
-        <option value="180">3 hours</option><option value="0">All day</option>
-      </select>
-    </div>
-    <div class="fld"><label>Category</label>
-      <div class="cat-pick">
-        <button class="cat-chip workout sel" data-cat="workout">Workout</button>
-        <button class="cat-chip social" data-cat="social">Social</button>
-        <button class="cat-chip work" data-cat="work">Work</button>
-        <button class="cat-chip personal" data-cat="personal">Personal</button>
-        <button class="cat-chip other" data-cat="other">Other</button>
-      </div>
-    </div>
+<!-- Delete confirm toast -->
+<div class="del-toast" id="del-toast" style="display:none">
+  <span id="del-toast-msg">Delete this workout?</span>
+  <div style="display:flex;gap:8px;margin-top:10px">
+    <button class="btn btn-g btn-sm" id="del-cancel">Cancel</button>
+    <button class="btn btn-p btn-sm" id="del-confirm" style="background:#f43f5e;box-shadow:none">Delete</button>
   </div>
-  <div class="mfoot"><button class="btn btn-g" data-close="m-ev">Cancel</button><button class="btn btn-p" id="sv-ev">Save</button></div>
-</div>
-
-<!-- Article -->
-<div class="modal" id="m-art">
-  <div class="mhdr"><h3>Save Article</h3><button class="mx" data-close="m-art">×</button></div>
-  <div class="mbody">
-    <div class="fld"><label>Title</label><input id="a-ti" placeholder="Article title"></div>
-    <div class="fld"><label>URL</label><input id="a-ur" type="url" placeholder="https://..."></div>
-    <div class="fld"><label>Source</label><input id="a-sr" placeholder="e.g. Nature, STAT News"></div>
-    <div class="fld"><label>Tags</label>
-      <div style="margin-top:3px" id="a-tg">
-        <button class="tchip" data-v="science">Science</button><button class="tchip" data-v="pharma">Pharma</button>
-        <button class="tchip" data-v="health">Health</button><button class="tchip" data-v="aitech">AI & Biotech</button>
-        <button class="tchip" data-v="clinical">Clinical</button><button class="tchip" data-v="business">Business</button>
-        <button class="tchip" data-v="general">General</button>
-      </div>
-    </div>
-    <div class="fld"><label>Notes</label><textarea id="a-no" placeholder="Key takeaways…"></textarea></div>
-  </div>
-  <div class="mfoot"><button class="btn btn-g" data-close="m-art">Cancel</button><button class="btn btn-p" id="sv-art">Save</button></div>
-</div>
-
-<!-- Media -->
-<div class="modal" id="m-med">
-  <div class="mhdr"><h3>Add Media</h3><button class="mx" data-close="m-med">×</button></div>
-  <div class="mbody">
-    <div class="fld"><label>Title</label><input id="md-ti" placeholder="Video, episode, or article title"></div>
-    <div class="fld"><label>URL</label><input id="md-ur" type="url" placeholder="https://..."></div>
-    <div class="r2">
-      <div class="fld"><label>Type</label>
-        <select id="md-tp">
-          <option value="YouTube">YouTube</option><option value="Podcast">Podcast</option>
-          <option value="Article">Article</option><option value="Webinar">Webinar</option>
-          <option value="Interview">Interview</option><option value="Other">Other</option>
-        </select>
-      </div>
-      <div class="fld"><label>Creator / Source</label><input id="md-cr" placeholder="Channel, host, publication"></div>
-    </div>
-    <div class="fld"><label>Tags</label>
-      <div style="margin-top:3px" id="md-tg">
-        <button class="tchip" data-v="science">Science</button><button class="tchip" data-v="business">Business</button>
-        <button class="tchip" data-v="health">Health</button><button class="tchip" data-v="tech">Tech</button>
-        <button class="tchip" data-v="pharma">Pharma</button><button class="tchip" data-v="aitech">AI & Biotech</button>
-        <button class="tchip" data-v="general">General</button>
-      </div>
-    </div>
-    <div class="fld"><label>Notes</label><textarea id="md-no" placeholder="Key takeaways, timestamps, why you saved this…"></textarea></div>
-  </div>
-  <div class="mfoot"><button class="btn btn-g" data-close="m-med">Cancel</button><button class="btn btn-p" id="sv-med">Save</button></div>
-</div>
-
-<!-- Course -->
-<div class="modal" id="m-crs">
-  <div class="mhdr"><h3 id="m-crs-title">Add Course</h3><button class="mx" data-close="m-crs">×</button></div>
-  <div class="mbody">
-    <input type="hidden" id="crs-edit-id">
-    <input type="hidden" id="crs-status-val">
-    <div class="fld"><label>Course Title</label><input id="cr-ti" placeholder="e.g. Drug Discovery Fundamentals"></div>
-    <div class="r2">
-      <div class="fld"><label>Course Type Tag</label><input id="cr-tag" placeholder="e.g. Clinical Research, Python…"></div>
-      <div class="fld"><label>Format / Nature</label>
-        <select id="cr-form">
-          <option value="Online">Online</option>
-          <option value="Onsite">Onsite</option>
-          <option value="Hybrid">Hybrid</option>
-          <option value="Self-paced">Self-paced</option>
-          <option value="Bootcamp">Bootcamp</option>
-          <option value="Certificate">Certificate programme</option>
-        </select>
-      </div>
-    </div>
-    <div class="r2">
-      <div class="fld"><label>Price / Cost</label><input id="cr-price" placeholder="e.g. Free, ฿15,000, $299/mo"></div>
-      <div class="fld"><label>Duration</label><input id="cr-duration" placeholder="e.g. 8 weeks, 3 months, ongoing"></div>
-    </div>
-    <div class="r2">
-      <div class="fld"><label>Link / URL</label><input id="cr-ur" type="url" placeholder="https://..."></div>
-      <div class="fld"><label>Date / Schedule</label><input id="cr-date" placeholder="e.g. Jan–Mar 2026, Tues 6pm"></div>
-    </div>
-    <div class="r2">
-      <div class="fld"><label>Contact Person</label><input id="cr-contact" placeholder="Name or email"></div>
-      <div class="fld"></div>
-    </div>
-    <div class="fld"><label>Curriculum / Description</label><textarea id="cr-desc" placeholder="What this course covers, key topics, modules…"></textarea></div>
-    <div class="fld"><label>My Notes & Learnings</label><textarea id="cr-notes" placeholder="Learnings, reflections, action items…"></textarea></div>
-  </div>
-  <div class="mfoot"><button class="btn btn-g" data-close="m-crs">Cancel</button><button class="btn btn-p" id="sv-crs">Save</button></div>
-</div>
-
-<!-- Conference -->
-<div class="modal" id="m-conf">
-  <div class="mhdr"><h3>Log Conference</h3><button class="mx" data-close="m-conf">×</button></div>
-  <div class="mbody">
-    <div class="fld"><label>Name</label><input id="cf-na" placeholder="e.g. BIO International 2026"></div>
-    <div class="r2">
-      <div class="fld"><label>Date</label><input id="cf-dt" type="date"></div>
-      <div class="fld"><label>Location</label><input id="cf-lo" placeholder="City or Virtual"></div>
-    </div>
-    <div class="fld"><label>Key Learnings</label><textarea id="cf-le" placeholder="What did you learn?"></textarea></div>
-    <div class="fld"><label>Speakers / Sessions</label><textarea id="cf-sp" placeholder="Notable talks…"></textarea></div>
-    <div class="fld"><label>Action Items</label><textarea id="cf-ac" placeholder="Follow-up tasks…"></textarea></div>
-  </div>
-  <div class="mfoot"><button class="btn btn-g" data-close="m-conf">Cancel</button><button class="btn btn-p" id="sv-conf">Save</button></div>
-</div>
-
-<!-- Application -->
-<div class="modal" id="m-app">
-  <div class="mhdr"><h3 id="m-app-title">Log Application</h3><button class="mx" data-close="m-app">×</button></div>
-  <div class="mbody">
-    <div class="r2">
-      <div class="fld"><label>Company</label><input id="ap-co" placeholder="Company name"></div>
-      <div class="fld"><label>Role</label><input id="ap-ro" placeholder="Job title"></div>
-    </div>
-    <div class="fld"><label>Job URL</label><input id="ap-ur" type="url" placeholder="https://..."></div>
-    <div class="r2">
-      <div class="fld"><label>Date Applied</label><input id="ap-dt" type="date"></div>
-      <div class="fld"><label>Status</label>
-        <select id="ap-st"><option value="toapply">To Apply</option><option value="applied">Applied</option><option value="interview">Interview</option><option value="offer">Offer</option><option value="rejected">Rejected</option></select>
-      </div>
-    </div>
-    <div class="fld"><label>Location</label>
-      <div style="display:flex;gap:8px;margin-top:4px">
-        <button id="ap-pill-bkk" onclick="setAppLoc('bkk')" type="button" style="padding:6px 18px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:#92400e;transition:all .15s">Bangkok</button>
-        <button id="ap-pill-sgp" onclick="setAppLoc('sgp')" type="button" style="padding:6px 18px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #d1fae5;background:#f0fdf4;color:#065f46;transition:all .15s">Singapore</button>
-      </div>
-    </div>
-    <div style="border-top:1px solid #f0ebff;padding-top:10px">
-      <p style="font-size:11px;color:var(--t3);margin-bottom:8px;font-style:italic">Paste from job posting — save before interview notes</p>
-      <div class="fld"><label>Job Requirements</label><textarea id="ap-req" placeholder="Paste the requirements from the job posting..." style="min-height:80px"></textarea></div>
-      <div class="fld" style="margin-top:8px"><label>Job Responsibilities</label><textarea id="ap-resp" placeholder="Paste the responsibilities from the job posting..." style="min-height:80px"></textarea></div>
-      <div class="fld" style="margin-top:8px"><label>Cover Letter</label><textarea id="ap-cv" placeholder="Paste or write your cover letter draft..." style="min-height:90px"></textarea></div>
-      <div class="fld" style="margin-top:8px"><label>Interview Notes</label><textarea id="ap-int" placeholder="Questions asked, your answers, feedback received..." style="min-height:80px"></textarea></div>
-      <div class="fld" style="margin-top:8px"><label>General Notes</label><textarea id="ap-no" placeholder="Contacts, referrals, follow-up dates..." style="min-height:60px"></textarea></div>
-    </div>
-  </div>
-  <div class="mfoot"><button class="btn btn-g" data-close="m-app">Cancel</button><button class="btn btn-p" id="sv-app">Save</button></div>
-</div>
-
-<!-- Course Notes Editor — full screen modal -->
-<div class="modal" id="m-crs-notes" style="width:100%;max-width:100%;height:100vh;max-height:100vh;border-radius:0;margin:0;top:0;left:0;transform:none;display:none;flex-direction:column;overflow:hidden">
-  <div style="display:flex;align-items:center;gap:12px;padding:.85rem 1.2rem;border-bottom:1px solid #f0ebff;flex-shrink:0;background:#fff">
-    <button onclick="closeCrsNotes()" style="background:none;border:none;cursor:pointer;font-size:22px;color:var(--t3);padding:0 4px;line-height:1">&#8592;</button>
-    <div style="flex:1;min-width:0">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a855f7;margin-bottom:1px">Course Notes</div>
-      <div id="crs-notes-title" style="font-size:16px;font-weight:700;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
-    </div>
-    <span id="notes-save-badge" style="font-size:11px;color:var(--t3);font-style:italic">Auto-saves</span>
-    <button onclick="saveNotesEditor()" style="padding:6px 14px;border-radius:10px;background:rgba(168,85,247,.12);border:1.5px solid #d8b4fe;font-size:12px;font-weight:600;color:#7c3aed;cursor:pointer;flex-shrink:0">Save</button>
-  </div>
-  <div style="flex:1;overflow-y:auto;padding:1.2rem">
-    <div id="crs-notes-modules"></div>
-    <button onclick="addModule()" style="width:100%;padding:12px;border:2px dashed #e9d5ff;border-radius:12px;background:transparent;font-size:13px;font-weight:600;color:#a855f7;cursor:pointer;margin-top:.5rem">+ Add Module</button>
-  </div>
-</div>
-
-<!-- To-Do modal -->
-<div class="modal" id="m-todo">
-  <div class="mhdr"><h3 id="m-todo-title">Add Task</h3><button class="mx" data-close="m-todo">×</button></div>
-  <div class="mbody">
-    <div class="fld"><label>Task</label><input id="td-text" placeholder="What needs to be done?"></div>
-    <div class="r2">
-      <div class="fld"><label>Category</label>
-        <select id="td-cat">
-          <option value="today">Today</option>
-          <option value="work">Work</option>
-          <option value="personal">Personal</option>
-          <option value="errand">Errand</option>
-        </select>
-      </div>
-      <div class="fld"><label>Due Date</label><input id="td-date" type="date"></div>
-    </div>
-    <div class="fld"><label>Notes</label><input id="td-notes" placeholder="Optional details..."></div>
-  </div>
-  <div class="mfoot"><button class="btn btn-g" data-close="m-todo">Cancel</button><button class="btn btn-p" id="sv-todo">Save</button></div>
 </div>
 
 <script type="module" src="app.js"></script>
+<script type="module" src="mobile.js"></script>
 </body>
 </html>

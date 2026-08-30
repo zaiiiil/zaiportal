@@ -1,0 +1,231 @@
+/* ══════════════════════════════════════════
+   MOBILE.CSS — workout portal mobile skin
+   ══════════════════════════════════════════ */
+
+/* ── Reset sticky headers we don't need ── */
+.sec-label,
+.tabs { display: none !important; }
+
+/* ── Body padding for bottom nav ── */
+body {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}
+
+/* ── Header: slimmer on mobile ── */
+.hdr {
+  padding: 0 1rem;
+  height: 52px;
+}
+.hdate { display: none; }
+
+/* ── Panels container ── */
+.mob-panels {
+  position: relative;
+  z-index: 1;
+}
+
+.mob-panel {
+  display: none;
+}
+.mob-panel.active {
+  display: block;
+}
+
+.mob-content {
+  padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+/* ── Bottom nav ── */
+.bot-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0; right: 0;
+  height: calc(64px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: rgba(255,255,255,.95);
+  backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(0,0,0,.07);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 60;
+  box-shadow: 0 -4px 24px rgba(139,92,246,.08);
+}
+
+.bn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--t3);
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+  transition: color .15s;
+  -webkit-tap-highlight-color: transparent;
+  min-width: 70px;
+}
+.bn.active { color: var(--purple); }
+.bn svg { transition: stroke .15s; }
+.bn.active svg { stroke: var(--purple); }
+
+/* Big centre log button */
+.bn-log {
+  position: relative;
+  top: -10px;
+  color: #fff !important;
+}
+.bn-plus {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--g1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 300;
+  box-shadow: 0 6px 20px rgba(139,92,246,.45);
+  transition: transform .15s, box-shadow .15s;
+  color: #fff;
+}
+.bn-log.active .bn-plus,
+.bn-log:active .bn-plus {
+  transform: scale(.94);
+  box-shadow: 0 3px 12px rgba(139,92,246,.35);
+}
+.bn-log span { color: var(--purple); font-weight: 700; }
+
+/* ── Stats row: 2-column on mobile ── */
+.stats-row {
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: .65rem !important;
+}
+
+/* ── This week: compact ── */
+.wk-week {
+  gap: 4px;
+}
+.wk-day {
+  padding: .45rem .2rem;
+}
+.wk-dn { font-size: 8px; }
+.wk-num { font-size: 13px; }
+.wk-ico { font-size: 11px; }
+
+/* ── Log card ── */
+.log-card {
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+/* ── Workout type picker grid ── */
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 1.2rem;
+}
+
+.type-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px 8px;
+  border-radius: 14px;
+  border: 2px solid #f0ebff;
+  background: #faf8ff;
+  cursor: pointer;
+  transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+  font-family: var(--font);
+}
+.type-chip .tc-ico { font-size: 22px; line-height: 1; }
+.type-chip .tc-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--t3);
+  text-align: center;
+  line-height: 1.2;
+}
+.type-chip.sel {
+  border-color: var(--purple);
+  background: rgba(168,85,247,.08);
+  box-shadow: 0 0 0 3px rgba(168,85,247,.12);
+}
+.type-chip.sel .tc-lbl { color: var(--purple); }
+
+/* ── Log fields ── */
+.log-fields { display: flex; flex-direction: column; gap: 12px; }
+
+.log-submit {
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+  border-radius: 16px;
+  margin-top: 4px;
+  letter-spacing: -.01em;
+}
+
+/* ── r3 on mobile: stack 3 cols still but smaller ── */
+.r3 {
+  gap: 8px;
+}
+.r3 .fld label { font-size: 9px; }
+.r3 .fld input { padding: 8px 9px; font-size: 13px; }
+
+/* ── Modal: slide up from bottom ── */
+.modal {
+  top: auto !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: none !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  border-radius: 24px 24px 0 0 !important;
+  max-height: 85vh !important;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ── Delete confirm toast ── */
+.del-toast {
+  position: fixed;
+  bottom: calc(80px + env(safe-area-inset-bottom));
+  left: 1rem; right: 1rem;
+  background: #fff;
+  border: 1.5px solid #fca5a5;
+  border-radius: 18px;
+  padding: 1rem 1.2rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,.14);
+  z-index: 200;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--t);
+  animation: slideUp .2s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── History: session rows ── */
+#wk-list .glass {
+  margin-bottom: .6rem;
+}
+
+/* ── Dividers ── */
+.divl { margin: 1.1rem 0 .75rem; }
+
+/* ── Blobs: smaller & behind everything ── */
+.blob { opacity: .15; }
+.b1 { width: 280px; height: 280px; }
+.b2 { width: 220px; height: 220px; }
+.b3 { width: 180px; height: 180px; }
